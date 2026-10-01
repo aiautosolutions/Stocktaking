@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E1A2B">
+  <title>CGC StockSense · Operations Stock Take</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- ===================== LOGIN ===================== -->
+  <section id="viewLogin" class="view active">
+    <div class="login-shell">
+      <aside class="login-brand">
+        <div class="brand">
+          <div class="monogram">CGC</div>
+          <div>
+            <div class="brand-name">StockSense</div>
+            <div class="brand-sub">Operations Department</div>
+          </div>
+        </div>
+        <div class="brand-copy">
+          <p class="eyebrow">Stock Take Platform</p>
+          <h1>Count with confidence.<br><em>Evidence on every line.</em></h1>
+          <ul class="brand-points">
+            <li><span></span>Photo proof captured at the point of count</li>
+            <li><span></span>Barcode-assisted asset identification</li>
+            <li><span></span>Live submission straight to SharePoint</li>
+            <li><span></span>Works offline, syncs automatically</li>
+          </ul>
+        </div>
+        <p class="brand-foot">© CGC · Authorised personnel only</p>
+      </aside>
+
+      <main class="login-form">
+        <div id="stepEmail">
+          <p class="eyebrow">Sign in</p>
+          <h2>Verify your identity</h2>
+          <p class="lead">Enter your email address. We will send a one-time verification code.</p>
+          <label class="lbl" for="inpEmail">Email address</label>
+          <input id="inpEmail" type="email" class="inp" placeholder="name@company.com" autocomplete="email">
+          <button id="btnSendOtp" class="btn btn-primary btn-block">Send verification code</button>
+        </div>
+
+        <div id="stepOtp" class="hidden">
+          <p class="eyebrow">Verification</p>
+          <h2>Enter your code</h2>
+          <p class="lead">A 6-digit code was sent to <b id="lblOtpEmail"></b>.</p>
+          <label class="lbl" for="inpOtp">Verification code</label>
+          <input id="inpOtp" type="text" inputmode="numeric" maxlength="6" class="inp inp-otp" placeholder="••••••" autocomplete="one-time-code">
+          <button id="btnVerifyOtp" class="btn btn-primary btn-block">Verify &amp; continue</button>
+          <button id="btnBackEmail" class="btn btn-link btn-block">Use a different email</button>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ===================== APP ===================== -->
+  <section id="viewApp" class="view">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand sm">
+          <div class="monogram">CGC</div>
+          <div>
+            <div class="brand-name">StockSense</div>
+            <div class="brand-sub" id="lblUser">—</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span id="netBadge" class="net online"><i></i><b>Online</b></span>
+          <button id="btnLogout" class="btn btn-ghost-inv btn-sm">Sign out</button>
+        </div>
+      </div>
+      <div class="session-strip">
+        <div class="topbar-inner">
+          <span class="muted-inv">Active session</span>
+          <b id="lblSession" class="mono">—</b>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="tabCount">New Count</button>
+      <button class="tab-btn" data-tab="tabHistory">My Submissions</button>
+      <button class="tab-btn" data-tab="tabQueue">Offline Queue <em id="queueBadge" class="badge hidden">0</em></button>
+    </nav>
+
+    <main class="content">
+      <!-- ========== NEW COUNT ========== -->
+      <div id="tabCount" class="tab active">
+
+        <section class="card">
+          <header class="card-head">
+            <div><span class="step">01</span><h3>Location &amp; asset</h3></div>
+            <button id="btnScan" class="btn btn-outline btn-sm">Scan barcode</button>
+          </header>
+
+          <div id="scanWrap" class="scan-wrap hidden">
+            <div id="reader"></div>
+            <button id="btnStopScan" class="btn btn-ghost btn-block">Close scanner</button>
+          </div>
+
+          <label class="lbl" for="selLocation">Location <i>*</i></label>
+          <select id="selLocation" class="inp"></select>
+
+          <div class="grid-2">
+            <div>
+              <label class="lbl" for="inpAssetCode">Asset code <i>*</i></label>
+              <input id="inpAssetCode" class="inp mono" placeholder="e.g. FA00123" autocomplete="off" maxlength="100">
+            </div>
+            <div>
+              <label class="lbl" for="inpAssetName">Asset name <i>*</i></label>
+              <input id="inpAssetName" class="inp" placeholder="e.g. Dell Latitude 5440" autocomplete="off" maxlength="255">
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <header class="card-head">
+            <div><span class="step">02</span><h3>Physical count</h3></div>
+          </header>
+
+          <label class="lbl">Physical quantity <i>*</i></label>
+          <div class="stepper">
+            <button class="step-btn" data-delta="-1" aria-label="Decrease">−</button>
+            <input id="inpQty" type="number" inputmode="numeric" min="0" step="1" class="inp qty mono" value="0">
+            <button class="step-btn" data-delta="1" aria-label="Increase">+</button>
+          </div>
+          <div class="quick">
+            <button class="chip" data-delta="5">+5</button>
+            <button class="chip" data-delta="10">+10</button>
+            <button class="chip" data-delta="50">+50</button>
+            <button class="chip" data-reset="1">Reset</button>
+          </div>
+
+          <label class="lbl">Condition <i>*</i></label>
+          <div id="condGroup" class="segmented">
+            <button class="seg active" data-cond="Good">Good</button>
+            <button class="seg" data-cond="Damaged">Damaged</button>
+            <button class="seg" data-cond="Missing">Missing</button>
+            <button class="seg" data-cond="Obsolete">Obsolete</button>
+          </div>
+
+          <label class="lbl" for="inpRemarks">Remarks <span id="remarkReq" class="req-note hidden">required for this condition</span></label>
+          <textarea id="inpRemarks" class="inp" rows="3" maxlength="1000" placeholder="Observations, discrepancies or notes"></textarea>
+        </section>
+
+        <section class="card">
+          <header class="card-head">
+            <div><span class="step">03</span><h3>Photo evidence</h3></div>
+            <span id="photoCounter" class="counter mono">0 / 5</span>
+          </header>
+
+          <div id="camWrap" class="cam hidden">
+            <video id="camVideo" playsinline muted autoplay></video>
+            <div class="cam-guide"></div>
+            <div id="camStamp" class="cam-stamp mono"></div>
+            <div id="camFlash" class="cam-flash"></div>
+            <div class="cam-bar">
+              <button id="btnCamClose" class="cam-btn" aria-label="Close camera">✕</button>
+              <button id="btnCapture" class="shutter" aria-label="Capture"></button>
+              <button id="btnCamSwitch" class="cam-btn" aria-label="Switch camera">⟲</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <button id="btnOpenCam" class="btn btn-primary">Open camera</button>
+            <button id="btnPickPhoto" class="btn btn-outline">Upload photo</button>
+          </div>
+          <input id="fileCamera" type="file" accept="image/*" capture="environment" hidden>
+          <input id="fileGallery" type="file" accept="image/*" multiple hidden>
+
+          <div id="photoGrid" class="photos"></div>
+          <p class="hint">Each photo is stamped with session, location, asset code, user, date/time and GPS position for audit purposes.</p>
+        </section>
+
+        <section class="card card-submit">
+          <div class="submit-meta">
+            <span id="geoBadge" class="geo">Locating…</span>
+            <button id="btnGeo" class="btn btn-link btn-sm">Refresh location</button>
+          </div>
+          <button id="btnSubmit" class="btn btn-primary btn-block btn-lg">Submit count</button>
+          <button id="btnClear" class="btn btn-link btn-block">Clear form</button>
+        </section>
+      </div>
+
+      <!-- ========== HISTORY ========== -->
+      <div id="tabHistory" class="tab">
+        <section class="card">
+          <header class="card-head">
+            <div><h3>My submissions</h3><p class="sub">Current session only</p></div>
+            <button id="btnRefreshHistory" class="btn btn-outline btn-sm">Refresh</button>
+          </header>
+          <div class="kpis">
+            <div class="kpi"><span>Submitted</span><b id="kpiTotal" class="mono">0</b></div>
+            <div class="kpi"><span>Total quantity</span><b id="kpiQty" class="mono">0</b></div>
+            <div class="kpi"><span>Exceptions</span><b id="kpiExc" class="mono">0</b></div>
+            <div class="kpi"><span>Verified</span><b id="kpiVer" class="mono">0</b></div>
+          </div>
+          <input id="inpFilter" class="inp" placeholder="Filter by asset code, name or location">
+          <div id="historyList" class="list"></div>
+        </section>
+      </div>
+
+      <!-- ========== QUEUE ========== -->
+      <div id="tabQueue" class="tab">
+        <section class="card">
+          <header class="card-head">
+            <div><h3>Offline queue</h3><p class="sub">Saved on this device, waiting to sync</p></div>
+            <button id="btnSync" class="btn btn-primary btn-sm">Sync now</button>
+          </header>
+          <div id="queueList" class="list"></div>
+        </section>
+      </div>
+    </main>
+  </section>
+
+  <div id="loader" class="loader hidden"><div class="spinner"></div><p id="loaderText">Loading…</p></div>
+  <div id="toastHost" class="toasts"></div>
+  <canvas id="workCanvas" hidden></canvas>
+</body>
+</html>
