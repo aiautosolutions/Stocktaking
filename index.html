@@ -377,7 +377,7 @@
       document.getElementById('btnTheme').addEventListener('click', toggleTheme);
 
       var js = document.createElement('script');
-      js.src = 'app.js?v=6';
+      js.src = 'app.js?v=7';
       js.onerror = function () { banner('app.js could not be found. It must be named app.js (lowercase) in the same folder as index.html.'); };
       js.onload = function () {
         if (!window.STOCKSENSE_READY) { banner('app.js loaded but did not start. Re-copy the whole app.js file.'); }
