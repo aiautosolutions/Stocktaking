@@ -903,4 +903,23 @@ function bind() {
   // Network + lifecycle
   window.addEventListener('online', function () { updateNet(); toast('Back online — syncing', 'success'); syncQueue(true); });
   window.addEventListener('offline', function () { updateNet(); toast('You are offline. Submissions will be queued.', 'warn'); });
-  document.
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { stopCamera(); stopScan(); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeSuccess(); } });
+}
+
+/* ---------------- INIT ---------------- */
+function init() {
+  try {
+    applyBranding();
+    bind();
+    renderPhotos();
+    if (!CONFIG.AUTH_ENABLED) { $('btnSendOtp').textContent = 'Continue'; }
+    window.STOCKSENSE_READY = true;
+    var u = loadUser();
+    if (u) { S.user = u; enterApp(); }
+  } catch (e) {
+    if (window.ssBanner) { window.ssBanner('Startup error: ' + e.message); }
+    throw e;
+  }
+}
+init();
