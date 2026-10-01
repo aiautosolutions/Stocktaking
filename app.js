@@ -23,7 +23,7 @@ var CONFIG = {
   PHOTO_MAX_DIM: 1600,
   PHOTO_QUALITY: 0.72,
   LOGIN_HOURS: 10,
-  RESEND_SECONDS: 30
+  RESEND_SECONDS: 60              // fallback only; flow's expiresIn is used when provided
 };
 
 /* ---------------- STATE ---------------- */
@@ -67,7 +67,7 @@ function toast(msg, type, ms) {
   t.appendChild(el('span', 'tdot', icon));
   t.appendChild(el('span', '', msg));
   $('toastHost').appendChild(t);
-  setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 600); }, ms);
+  setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 300); }, ms);
 }
 function loading(on, text) {
   $('loaderText').textContent = text || 'Loading…';
@@ -170,20 +170,20 @@ function loadUser() {
   store.del('ops_st_user');
   return null;
 }
-function startResendTimer() {
+function startResendTimer(seconds) {
   var b = $('btnResend');
-  var left = CONFIG.RESEND_SECONDS;
+  var left = parseInt(seconds, 10) || CONFIG.RESEND_SECONDS;
   clearInterval(S.resendTimer);
   b.disabled = true;
-  b.textContent = 'Resend in ' + left + 's';
+  b.textContent = 'Code expires in ' + left + 's';
   S.resendTimer = setInterval(function () {
     left--;
     if (left > 0) {
-      b.textContent = 'Resend in ' + left + 's';
+      b.textContent = 'Code expires in ' + left + 's';
     } else {
       clearInterval(S.resendTimer);
       b.disabled = false;
-      b.textContent = 'Resend code';
+      b.textContent = 'Code expired · Resend';
     }
   }, 1000);
 }
@@ -203,14 +203,15 @@ async function sendOtp(isResend) {
   loading(true, 'Sending verification code…');
   try {
     var r = await api(CONFIG.FLOW_SEND_OTP, { email: email });
-    if (r.success === false) { throw new Error(r.message || 'Unable to send code'); }
+    var sst = String(r.status || '').toLowerCase();
+    if (r.success === false || sst === 'error' || sst === 'failed' || sst === 'blocked') { throw new Error(r.message || 'Unable to send code'); }
     S.pendingEmail = email;
     $('lblOtpEmail').textContent = email;
     $('stepEmail').classList.add('hidden');
     $('stepOtp').classList.remove('hidden');
     $('inpOtp').value = '';
     $('inpOtp').focus();
-    startResendTimer();
+    startResendTimer(r.expiresIn);
     toast(isResend ? 'A new code has been sent' : 'Verification code sent', 'success');
   } catch (e) {
     toast(e.message, 'error', 6000);
@@ -226,19 +227,31 @@ async function verifyOtp() {
   S.busy = true;
   loading(true, 'Verifying…');
   try {
-    var r = await api(CONFIG.FLOW_VERIFY_OTP, { email: S.pendingEmail, code: otp });
-    var ok = r.success === true || r.verified === true || r.valid === true;
-    if (!ok) { throw new Error(r.message || 'Invalid or expired code'); }
+    // Flow PC_VerifyOTP reads triggerBody()?['code']; otp sent too for safety
+    var r = await api(CONFIG.FLOW_VERIFY_OTP, { email: S.pendingEmail, code: otp, otp: otp });
+    var st = String(r.status || '').toLowerCase();
+    var ok = st === 'verified' || st === 'valid' || st === 'success' ||
+             r.success === true || r.verified === true || r.valid === true;
+    if (!ok) {
+      if (st === 'locked' || st === 'expired') {
+        $('inpOtp').value = '';
+        clearInterval(S.resendTimer);
+        $('btnResend').disabled = false;
+        $('btnResend').textContent = 'Resend code';
+      }
+      throw new Error(r.message || 'Invalid or expired code');
+    }
     clearInterval(S.resendTimer);
     saveUser({ email: S.pendingEmail });
     S.busy = false;
     loading(false);
-    enterApp();
+    toast(r.message || 'Identity verified', 'success');
+    await enterApp();
   } catch (e) {
     S.busy = false;
     loading(false);
     $('inpOtp').classList.add('invalid');
-    toast(e.message, 'error');
+    toast(e.message, 'error', 5000);
   }
 }
 function logout() {
@@ -890,23 +903,4 @@ function bind() {
   // Network + lifecycle
   window.addEventListener('online', function () { updateNet(); toast('Back online — syncing', 'success'); syncQueue(true); });
   window.addEventListener('offline', function () { updateNet(); toast('You are offline. Submissions will be queued.', 'warn'); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) { stopCamera(); stopScan(); } });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeSuccess(); } });
-}
-
-/* ---------------- INIT ---------------- */
-function init() {
-  try {
-    applyBranding();
-    bind();
-    renderPhotos();
-    if (!CONFIG.AUTH_ENABLED) { $('btnSendOtp').textContent = 'Continue'; }
-    window.STOCKSENSE_READY = true;
-    var u = loadUser();
-    if (u) { S.user = u; enterApp(); }
-  } catch (e) {
-    if (window.ssBanner) { window.ssBanner('Startup error: ' + e.message); }
-    throw e;
-  }
-}
-init();
+  document.
