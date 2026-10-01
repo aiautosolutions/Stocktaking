@@ -67,7 +67,7 @@ function toast(msg, type, ms) {
   t.appendChild(el('span', 'tdot', icon));
   t.appendChild(el('span', '', msg));
   $('toastHost').appendChild(t);
-  setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 300); }, ms);
+  setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 600); }, ms);
 }
 function loading(on, text) {
   $('loaderText').textContent = text || 'Loading…';
