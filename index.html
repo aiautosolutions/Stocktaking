@@ -4,13 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f6ff">
-  <title>StockSense · Operations Stock Take</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
-  <script src="app.js" defer></script>
+  <title>StockSense</title>
+  <style>body{opacity:0;background:#f5f6ff}</style>
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('ops_st_theme'); } catch (e) {}
+      if (!t) { t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+      document.documentElement.setAttribute('data-theme', t);
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'styles.css?v=3';
+      document.head.appendChild(css);
+      setTimeout(function () { document.body.style.opacity = '1'; }, 2500);
+    })();
+  </script>
 </head>
 <body>
   <div class="aurora" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
@@ -26,6 +34,11 @@
 
   <!-- ===================== LOGIN ===================== -->
   <section id="viewLogin" class="view active">
+    <button class="ib theme-btn login-theme" id="btnThemeLogin" type="button" aria-label="Switch light or dark mode">
+      <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+
     <div class="login-wrap">
       <div class="lock center">
         <div class="logo js-logo">YC</div>
@@ -39,24 +52,27 @@
         <div id="stepEmail">
           <p class="eyebrow">Secure sign in</p>
           <h2 class="title">Stock take, <span class="gtext">reimagined</span></h2>
-          <p class="sub">Enter your email. We'll send a one-time verification code.</p>
+          <p class="sub">Enter your email address and we will send you a one-time verification code.</p>
           <div class="field">
             <label class="flabel" for="inpEmail">Email address</label>
-            <input id="inpEmail" type="email" class="inp" placeholder="name@company.com" autocomplete="email">
+            <input id="inpEmail" type="email" class="inp" placeholder="name@company.com" autocomplete="email" inputmode="email">
           </div>
-          <button id="btnSendOtp" class="btn btn-p w100">Send verification code</button>
+          <button id="btnSendOtp" class="btn btn-p w100 mt" type="button">Send verification code</button>
         </div>
 
         <div id="stepOtp" class="hidden">
           <p class="eyebrow">Verification</p>
-          <h2 class="title">Enter your <span class="gtext">code</span></h2>
+          <h2 class="title">Check your <span class="gtext">inbox</span></h2>
           <p class="sub">A 6-digit code was sent to <b id="lblOtpEmail"></b></p>
           <div class="field">
             <label class="flabel" for="inpOtp">Verification code</label>
-            <input id="inpOtp" type="text" inputmode="numeric" maxlength="6" class="inp inp-otp num" placeholder="••••••" autocomplete="one-time-code">
+            <input id="inpOtp" type="text" inputmode="numeric" maxlength="6" class="inp inp-otp num" placeholder="000000" autocomplete="one-time-code">
           </div>
-          <button id="btnVerifyOtp" class="btn btn-p w100">Verify &amp; continue</button>
-          <button id="btnBackEmail" class="link w100 mt">Use a different email</button>
+          <button id="btnVerifyOtp" class="btn btn-p w100 mt" type="button">Verify &amp; continue</button>
+          <div class="otp-links">
+            <button id="btnBackEmail" class="link" type="button">← Change email</button>
+            <button id="btnResend" class="link" type="button">Resend code</button>
+          </div>
         </div>
       </div>
 
@@ -64,7 +80,9 @@
         <span class="fchip">📷 Photo proof</span>
         <span class="fchip">⌁ Barcode scan</span>
         <span class="fchip">☁ Offline sync</span>
+        <span class="fchip">📍 GPS stamp</span>
       </div>
+      <p class="foot">Authorised personnel only · Every submission is logged for audit</p>
     </div>
   </section>
 
@@ -80,8 +98,9 @@
           </div>
         </div>
         <div class="hact">
-          <button class="ib" id="btnTheme" type="button" aria-label="Toggle theme">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <button class="ib theme-btn" id="btnTheme" type="button" aria-label="Switch light or dark mode">
+            <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
           </button>
           <button class="ib" id="btnLogout" type="button" aria-label="Sign out">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
@@ -94,9 +113,9 @@
         <section id="tabCount" class="tab active">
           <div class="wrow">
             <div style="min-width:0">
-              <p class="eyebrow">Welcome back</p>
+              <p class="eyebrow" id="lblGreeting">Welcome back</p>
               <h2 class="title">New <span class="gtext">count</span></h2>
-              <p class="sub" id="lblUser">—</p>
+              <p class="sub ellip" id="lblUser">—</p>
             </div>
             <div class="ava" id="avatar">—</div>
           </div>
@@ -110,22 +129,35 @@
             <div class="bval"><strong class="num" id="lblSession">—</strong></div>
             <div class="hbot">
               <div>
-                <p class="hname">Today</p>
-                <p class="hno num"><span id="lblToday">0</span> submitted on this device</p>
+                <p class="hname">Today on this device</p>
+                <p class="hno num"><span id="lblToday">0</span> submitted</p>
               </div>
-              <div class="hmark js-mark">YC</div>
+              <div class="hmark js-mark">YOUR COMPANY</div>
+            </div>
+          </article>
+
+          <article class="glass prog">
+            <div class="prog-top">
+              <span class="prog-title">Submission readiness</span>
+              <span class="prog-count num" id="progText">0 / 3</span>
+            </div>
+            <div class="prog-bar"><i id="progBar"></i></div>
+            <div class="prog-steps">
+              <span class="pstep" id="ps1"><b>1</b>Asset</span>
+              <span class="pstep" id="ps2"><b>2</b>Count</span>
+              <span class="pstep" id="ps3"><b>3</b>Photos</span>
             </div>
           </article>
 
           <article class="glass card">
             <div class="ch-row">
               <div class="ch-left"><span class="stepn">01</span><h3 class="sect">Location &amp; asset</h3></div>
-              <button id="btnScan" class="pill-btn" type="button">⌁ Scan</button>
+              <button id="btnScan" class="pill-btn" type="button">⌁ Scan code</button>
             </div>
 
             <div id="scanWrap" class="scan-wrap hidden">
               <div id="reader"></div>
-              <button id="btnStopScan" class="btn btn-g w100 mt">Close scanner</button>
+              <button id="btnStopScan" class="btn btn-g w100 mt" type="button">Close scanner</button>
             </div>
 
             <div class="field">
@@ -151,7 +183,7 @@
               <label class="flabel">Physical quantity <i>*</i></label>
               <div class="stepper">
                 <button class="step-btn" data-delta="-1" type="button" aria-label="Decrease">−</button>
-                <input id="inpQty" type="number" inputmode="numeric" min="0" step="1" class="inp qty num" value="0">
+                <input id="inpQty" type="number" inputmode="numeric" min="0" step="1" class="inp qty num" value="1">
                 <button class="step-btn" data-delta="1" type="button" aria-label="Increase">+</button>
               </div>
               <div class="chips">
@@ -173,7 +205,7 @@
             </div>
 
             <div class="field">
-              <label class="flabel" for="inpRemarks">Remarks <span id="remarkReq" class="req hidden">· required</span></label>
+              <label class="flabel" for="inpRemarks">Remarks <span id="remarkReq" class="req hidden">· required for this condition</span></label>
               <textarea id="inpRemarks" class="inp" rows="3" maxlength="1000" placeholder="Observations, discrepancies or notes"></textarea>
             </div>
           </article>
@@ -192,7 +224,7 @@
               <div id="camFlash" class="cam-flash"></div>
               <div class="cam-bar">
                 <button id="btnCamClose" class="cam-btn" type="button" aria-label="Close camera">✕</button>
-                <button id="btnCapture" class="shutter" type="button" aria-label="Capture"></button>
+                <button id="btnCapture" class="shutter" type="button" aria-label="Capture photo"></button>
                 <button id="btnCamSwitch" class="cam-btn" type="button" aria-label="Switch camera">⟲</button>
               </div>
             </div>
@@ -205,10 +237,17 @@
             <input id="fileGallery" type="file" accept="image/*" multiple hidden>
 
             <div id="photoGrid" class="photos"></div>
-            <p class="note left">Each photo is stamped with session, location, asset code, user, date/time and GPS.</p>
+            <p class="note left">Every photo is stamped with company, session, location, asset code, user, date/time and GPS.</p>
           </article>
 
           <article class="glass card">
+            <div class="ch-row"><div class="ch-left"><span class="stepn">04</span><h3 class="sect">Review &amp; submit</h3></div></div>
+            <div class="summary">
+              <div class="srow2"><span>Location</span><b id="sumLoc">—</b></div>
+              <div class="srow2"><span>Asset</span><b id="sumAsset" class="num">—</b></div>
+              <div class="srow2"><span>Quantity · Condition</span><b id="sumQty">—</b></div>
+              <div class="srow2"><span>Photos</span><b id="sumPhotos" class="num">0</b></div>
+            </div>
             <div class="geo-row">
               <span id="geoBadge" class="geo">📍 Locating…</span>
               <button id="btnGeo" class="link" type="button">Refresh</button>
@@ -222,7 +261,7 @@
         <section id="tabHistory" class="tab">
           <p class="eyebrow">Current session</p>
           <h2 class="title">My <span class="gtext">submissions</span></h2>
-          <p class="sub">Everything you've counted in this session.</p>
+          <p class="sub">Everything you have counted in this session.</p>
 
           <div class="stats">
             <article class="glass ringcard">
@@ -261,7 +300,7 @@
         <section id="tabQueue" class="tab">
           <p class="eyebrow">Saved on this device</p>
           <h2 class="title">Offline <span class="gtext">queue</span></h2>
-          <p class="sub">Counts waiting to sync. They upload automatically when you're back online.</p>
+          <p class="sub">Counts waiting to sync. They upload automatically when you are back online.</p>
           <button id="btnSync" class="btn btn-p w100 mt2" type="button">⇪ Sync now</button>
           <div class="glass mt"><div id="queueList" class="alist"></div></div>
         </section>
@@ -282,8 +321,30 @@
     </nav>
   </section>
 
+  <!-- ===================== SUCCESS SHEET ===================== -->
+  <div class="mb" id="successSheet" role="dialog" aria-modal="true" aria-labelledby="sucTitle">
+    <div class="mp">
+      <div class="grab"></div>
+      <div class="sv">
+        <div class="burst" id="sucIcon">✓</div>
+        <h3 class="stitle" id="sucTitle">Count <span class="gtext" id="sucWord">submitted</span></h3>
+        <p class="ssub" id="sucSub">Your count and photo evidence are saved in SharePoint.</p>
+        <div class="spts"><span>Stock Take ID</span><strong class="num gtext" id="sucId">—</strong></div>
+        <button id="btnNext" class="btn btn-p w100" type="button">Count next asset →</button>
+      </div>
+    </div>
+  </div>
+
   <div id="loader" class="loader hidden"><div class="spinner"></div><p id="loaderText">Loading…</p></div>
   <div id="toastHost" class="toasts" aria-live="polite"></div>
   <canvas id="workCanvas" hidden></canvas>
+
+  <script>
+    (function () {
+      var js = document.createElement('script');
+      js.src = 'app.js?v=3';
+      document.body.appendChild(js);
+    })();
+  </script>
 </body>
 </html>
