@@ -8,8 +8,8 @@ const CONFIG = {
   COMPANY_NAME: 'Your Company',               // ← your company name (logo text)
   COMPANY_SHORT: '',                          // optional logo text, e.g. 'ACME'. Blank = auto initials
   AUTH_ENABLED: true,                         // false = skip OTP (testing only)
-  FLOW_SEND_OTP:   'PASTE_PC_SendOTP_HTTP_URL',
-  FLOW_VERIFY_OTP: 'PASTE_PC_VerifyOTP_HTTP_URL',
+  FLOW_SEND_OTP:   'https://ca5fc5190790e573a9eafd8b611366.91.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/22/workflows/587bb4ec5a9141d4b2b61445d9841139/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dMgM0-vkKVd11vFfkQwMaUdsrnId4PhwMAI0ulkC9tE',
+  FLOW_VERIFY_OTP: 'https://ca5fc5190790e573a9eafd8b611366.91.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/31/workflows/296ff3060c1a449582e85c81e154c6df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tdeev6xhU5HgYOU0zcHANo0FBK2kfDEqVrptgt1bkjQ',
   FLOW_CONFIG:     'PASTE_OPS_ST_GetConfig_HTTP_URL',
   FLOW_SUBMIT:     'PASTE_OPS_ST_SubmitCount_HTTP_URL',
   FLOW_HISTORY:    'PASTE_OPS_ST_MySubmissions_HTTP_URL',
