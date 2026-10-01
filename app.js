@@ -226,7 +226,7 @@ async function verifyOtp() {
   S.busy = true;
   loading(true, 'Verifying…');
   try {
-    var r = await api(CONFIG.FLOW_VERIFY_OTP, { email: S.pendingEmail, otp: otp });
+    var r = await api(CONFIG.FLOW_VERIFY_OTP, { email: S.pendingEmail, code: otp });
     var ok = r.success === true || r.verified === true || r.valid === true;
     if (!ok) { throw new Error(r.message || 'Invalid or expired code'); }
     clearInterval(S.resendTimer);
