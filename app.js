@@ -1,10 +1,12 @@
 /* =========================================================
-   CGC StockSense — Operations Stock Take (single SharePoint list)
+   StockSense — Operations Stock Take (single SharePoint list)
    ========================================================= */
 'use strict';
 
 /* ---------------- CONFIG ---------------- */
 const CONFIG = {
+  COMPANY_NAME: 'Your Company',               // ← your company name (logo text)
+  COMPANY_SHORT: '',                          // optional logo text, e.g. 'ACME'. Blank = auto initials
   AUTH_ENABLED: true,                         // false = skip OTP (testing only)
   FLOW_SEND_OTP:   'PASTE_PC_SendOTP_HTTP_URL',
   FLOW_VERIFY_OTP: 'PASTE_PC_VerifyOTP_HTTP_URL',
@@ -44,7 +46,8 @@ function el(tag, cls, text) {
   return e;
 }
 function toast(msg, type = 'info', ms = 3400) {
-  const t = el('div', `toast ${type}`, msg);
+  const t = el('div', `toast ${type}`);
+  t.append(el('span', 'tdot', type === 'error' ? '!' : type === 'warn' ? '•' : '✓'), el('span', '', msg));
   $('toastHost').appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, ms);
 }
@@ -78,13 +81,32 @@ async function api(url, body, timeoutMs = 60000) {
   }
 }
 
+/* ---------------- BRANDING + THEME ---------------- */
+function applyBranding() {
+  const name = CONFIG.COMPANY_NAME || 'Company';
+  const short = CONFIG.COMPANY_SHORT || name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  document.querySelectorAll('.js-company').forEach(e => { e.textContent = name; });
+  document.querySelectorAll('.js-logo').forEach(e => { e.textContent = short; });
+  document.querySelectorAll('.js-mark').forEach(e => { e.textContent = name.toUpperCase(); });
+  document.title = `${name} · StockSense`;
+}
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', t === 'dark' ? '#07071a' : '#f5f6ff');
+  localStorage.setItem('ops_st_theme', t);
+}
+function todayKey() { return 'ops_st_today_' + new Date().toISOString().slice(0, 10); }
+function bumpToday() { localStorage.setItem(todayKey(), String(num(localStorage.getItem(todayKey())) + 1)); renderToday(); }
+function renderToday() { $('lblToday').textContent = num(localStorage.getItem(todayKey())); }
+
 /* ---------------- OFFLINE QUEUE (IndexedDB) ---------------- */
 const DB = {
   db: null,
   open() {
     return new Promise((resolve, reject) => {
       if (this.db) return resolve(this.db);
-      const r = indexedDB.open('cgc_stocksense_ops', 1);
+      const r = indexedDB.open('stocksense_ops', 1);
       r.onupgradeneeded = () => r.result.createObjectStore('queue', { keyPath: 'clientId' });
       r.onsuccess = () => { this.db = r.result; resolve(this.db); };
       r.onerror = () => reject(r.error);
@@ -173,6 +195,8 @@ function logout() {
 async function enterApp() {
   showView('viewApp');
   $('lblUser').textContent = S.user.email;
+  $('avatar').textContent = S.user.email.slice(0, 2).toUpperCase();
+  renderToday();
   updateNet();
   await loadConfig();
   getGeo();
@@ -278,7 +302,7 @@ async function onScan(text) {
 function stampLines() {
   const ts = new Date().toLocaleString('en-MY', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   return [
-    `CGC STOCKSENSE · ${S.session || '-'}`,
+    `${(CONFIG.COMPANY_NAME || '').toUpperCase()} · ${S.session || '-'}`,
     `${$('selLocation').value || '-'} · ${$('inpAssetCode').value.trim() || '-'}`,
     `${S.user?.email || '-'}`,
     `${ts}${S.geo ? ` · ${S.geo.lat.toFixed(5)}, ${S.geo.lng.toFixed(5)}` : ''}`
@@ -335,15 +359,15 @@ function processImage(src, w, h) {
   const pad = Math.round(fs * 0.8), lh = Math.round(fs * 1.4);
   const boxH = pad * 2 + lh * lines.length;
 
-  ctx.fillStyle = 'rgba(14,26,43,0.78)';
+  ctx.fillStyle = 'rgba(12,10,40,0.72)';
   ctx.fillRect(0, ch - boxH, cw, boxH);
-  ctx.fillStyle = '#A8834A';
+  const g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, '#7c5cff'); g.addColorStop(1, '#22d3ee'); ctx.fillStyle = g;
   ctx.fillRect(0, ch - boxH, Math.max(4, Math.round(fs / 3)), boxH);
 
-  ctx.font = `500 ${fs}px "JetBrains Mono", Menlo, monospace`;
+  ctx.font = `600 ${fs}px "Space Grotesk", Menlo, monospace`;
   ctx.textBaseline = 'top';
   lines.forEach((t, i) => {
-    ctx.fillStyle = i === 0 ? '#D9BF8E' : '#FFFFFF';
+    ctx.fillStyle = i === 0 ? '#67e8f9' : '#FFFFFF';
     ctx.fillText(t, pad + Math.round(fs / 2), ch - boxH + pad + i * lh);
   });
   return c.toDataURL('image/jpeg', CONFIG.PHOTO_QUALITY);
@@ -410,16 +434,16 @@ function renderPhotos() {
 function getGeo() {
   return new Promise(resolve => {
     const b = $('geoBadge');
-    if (!navigator.geolocation) { b.textContent = 'Location not supported'; return resolve(null); }
-    b.textContent = 'Locating…';
+    if (!navigator.geolocation) { b.textContent = '📍 Location not supported'; return resolve(null); }
+    b.textContent = '📍 Locating…';
     b.className = 'geo';
     navigator.geolocation.getCurrentPosition(p => {
       S.geo = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) };
-      b.textContent = `Location captured (±${S.geo.acc} m)`;
+      b.textContent = `📍 Location captured (±${S.geo.acc} m)`;
       b.className = 'geo ok';
       resolve(S.geo);
     }, () => {
-      b.textContent = 'Location unavailable (optional)';
+      b.textContent = '📍 Location unavailable (optional)';
       resolve(null);
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   });
@@ -472,6 +496,7 @@ async function submitCount() {
 
   if (!navigator.onLine) {
     await DB.put(rec);
+    bumpToday();
     toast('Offline — saved to queue. It will sync automatically.', 'warn', 4200);
     S.busy = false;
     clearForm();
@@ -483,12 +508,14 @@ async function submitCount() {
   try {
     const r = await api(CONFIG.FLOW_SUBMIT, rec, 120000);
     if (r.success === false) throw new Error(r.message || 'Submission failed');
+    bumpToday();
     toast(`Submitted${r.stockTakeId ? ' · ' + r.stockTakeId : ''}`, 'success');
     buzz([30, 50, 30]);
     clearForm();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch {
     await DB.put(rec);
+    bumpToday();
     toast('Connection issue — saved to offline queue', 'warn');
     clearForm();
   } finally {
@@ -523,26 +550,35 @@ async function syncQueue(silent = false) {
   if (ok) toast(`${ok} queued record(s) synced`, 'success');
   if (fail) toast(`${fail} record(s) still pending`, 'warn');
 }
+function emptyState(icon, title, copy) {
+  const e = el('div', 'empty');
+  e.append(el('div', 'eic', icon), el('h3', 'etitle', title), el('p', 'ecopy', copy));
+  return e;
+}
+function itemRow(icon, iconCls, code, name, meta, right) {
+  const row = el('div', 'aitem');
+  const main = el('div', 'amain');
+  const t = el('p', 'at');
+  t.append(el('span', 'code', code), document.createTextNode(name || ''));
+  main.append(t, el('p', 'am', meta));
+  row.append(el('div', `aic ${iconCls}`, icon), main, right);
+  return row;
+}
 async function renderQueue() {
   const all = await DB.all();
   const list = $('queueList');
   list.textContent = '';
-  if (!all.length) { list.appendChild(el('div', 'empty', 'All caught up — nothing pending.')); return; }
+  if (!all.length) { list.appendChild(emptyState('☁', 'All caught up', 'Nothing is waiting to sync.')); return; }
   all.forEach(r => {
-    const row = el('div', 'row');
-    const main = el('div', 'row-main');
-    const title = el('div', 'row-title');
-    title.append(el('span', 'mono', r.assetCode), document.createTextNode(r.assetName));
-    main.append(title, el('div', 'row-sub', `${r.location} · Qty ${r.physicalQty} · ${r.photos.length} photo(s) · ${fmtDT(r.submittedAt)}`));
-    const del = el('button', 'icon-del', '✕');
+    const del = el('button', 'del', '✕');
     del.setAttribute('aria-label', 'Discard');
     del.onclick = async () => {
       if (!confirm('Discard this queued record? This cannot be undone.')) return;
       await DB.del(r.clientId);
       renderQueue(); updateQueueBadge();
     };
-    row.append(main, del);
-    list.appendChild(row);
+    list.appendChild(itemRow('⇪', 'queued', r.assetCode, r.assetName,
+      `${r.location} · Qty ${r.physicalQty} · ${r.photos.length} photo(s) · ${fmtDT(r.submittedAt)}`, del));
   });
 }
 async function updateQueueBadge() {
@@ -569,99 +605,28 @@ async function loadHistory() {
 }
 function renderHistory() {
   const h = S.history;
+  const good = h.filter(x => (x.condition || 'Good') === 'Good').length;
+  const pct = h.length ? Math.round(good / h.length * 100) : 0;
   $('kpiTotal').textContent = h.length;
   $('kpiQty').textContent = h.reduce((s, x) => s + num(x.physicalQty), 0).toLocaleString('en-MY');
-  $('kpiExc').textContent = h.filter(x => x.condition && x.condition !== 'Good').length;
-  $('kpiVer').textContent = h.filter(x => x.status === 'Verified').length;
+  $('kpiExc').textContent = h.length - good;
+  $('kpiVer').textContent = `${h.filter(x => x.status === 'Verified').length} verified`;
+  $('ringPct').textContent = `${pct}%`;
+  $('ringCap').textContent = h.length ? `${good} of ${h.length} assets in good condition` : 'No records yet';
+  const c = 2 * Math.PI * 31;
+  $('ringVal').setAttribute('stroke-dasharray', c.toFixed(1));
+  $('ringVal').setAttribute('stroke-dashoffset', (c * (1 - pct / 100)).toFixed(1));
 
   const q = $('inpFilter').value.trim().toLowerCase();
   const rows = q ? h.filter(x => [x.assetCode, x.assetName, x.location].some(v => String(v || '').toLowerCase().includes(q))) : h;
-
   const list = $('historyList');
   list.textContent = '';
-  if (!rows.length) { list.appendChild(el('div', 'empty', h.length ? 'No matching records.' : 'No submissions yet for this session.')); return; }
+  if (!rows.length) {
+    list.appendChild(h.length ? emptyState('⌕', 'No matches', 'Try a different asset code, name or location.')
+                              : emptyState('✦', 'Nothing yet', 'Your submitted counts for this session will appear here.'));
+    return;
+  }
+  const icons = { Good: '✓', Damaged: '!', Missing: '?', Obsolete: '⌛' };
   rows.forEach(x => {
-    const row = el('div', 'row');
-    const main = el('div', 'row-main');
-    const title = el('div', 'row-title');
-    title.append(el('span', 'mono', x.assetCode), document.createTextNode(x.assetName || ''));
-    main.append(title, el('div', 'row-sub', `${x.stockTakeId || ''} · ${x.location || ''} · ${fmtDT(x.submittedDate)}`));
-    const right = el('div', 'row-right');
-    right.append(el('span', 'row-qty', `Qty ${x.physicalQty ?? 0}`));
-    const pills = el('div');
-    if (x.condition && x.condition !== 'Good') pills.append(el('span', `pill ${x.condition}`, x.condition), document.createTextNode(' '));
-    pills.append(el('span', `pill ${String(x.status || '').split(' ')[0]}`, x.status || 'Submitted'));
-    right.append(pills);
-    row.append(main, right);
-    list.appendChild(row);
-  });
-}
-
-/* ---------------- TABS ---------------- */
-function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === id));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
-  if (id !== 'tabCount') { stopCamera(); stopScan(); }
-  if (id === 'tabHistory') loadHistory();
-  if (id === 'tabQueue') renderQueue();
-}
-
-/* ---------------- EVENTS ---------------- */
-function bind() {
-  $('btnSendOtp').onclick = sendOtp;
-  $('btnVerifyOtp').onclick = verifyOtp;
-  $('btnBackEmail').onclick = () => { $('stepOtp').classList.add('hidden'); $('stepEmail').classList.remove('hidden'); };
-  $('inpEmail').addEventListener('keydown', e => { if (e.key === 'Enter') sendOtp(); });
-  $('inpOtp').addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
-    if (e.target.value.length === 6) verifyOtp();
-  });
-  $('btnLogout').onclick = () => { if (confirm('Sign out of StockSense?')) logout(); };
-
-  $('selLocation').onchange = () => { localStorage.setItem('ops_st_location', $('selLocation').value); $('selLocation').classList.remove('invalid'); };
-  ['inpAssetCode', 'inpAssetName'].forEach(id => $(id).addEventListener('input', () => $(id).classList.remove('invalid')));
-  $('inpAssetCode').addEventListener('blur', e => { e.target.value = e.target.value.trim().toUpperCase(); });
-
-  $('btnScan').onclick = startScan;
-  $('btnStopScan').onclick = stopScan;
-
-  document.querySelectorAll('[data-delta]').forEach(b => b.addEventListener('click', () => {
-    $('inpQty').value = Math.max(0, parseInt($('inpQty').value || 0, 10) + parseInt(b.dataset.delta, 10));
-    buzz(8);
-  }));
-  document.querySelector('[data-reset]').onclick = () => { $('inpQty').value = 0; };
-  $('inpQty').addEventListener('focus', e => e.target.select());
-  document.querySelectorAll('.seg').forEach(s => { s.onclick = () => setCondition(s.dataset.cond); });
-
-  $('btnOpenCam').onclick = openCamera;
-  $('btnCamClose').onclick = stopCamera;
-  $('btnCapture').onclick = capture;
-  $('btnCamSwitch').onclick = switchCamera;
-  $('btnPickPhoto').onclick = () => $('fileGallery').click();
-  $('fileCamera').onchange = onFilePick;
-  $('fileGallery').onchange = onFilePick;
-
-  $('btnGeo').onclick = getGeo;
-  $('btnSubmit').onclick = submitCount;
-  $('btnClear').onclick = () => { if (confirm('Clear all entered details and photos?')) clearForm(); };
-
-  $('btnRefreshHistory').onclick = loadHistory;
-  $('inpFilter').addEventListener('input', renderHistory);
-  $('btnSync').onclick = () => syncQueue(false);
-
-  document.querySelectorAll('.tab-btn').forEach(b => { b.onclick = () => switchTab(b.dataset.tab); });
-
-  window.addEventListener('online', () => { updateNet(); toast('Back online — syncing', 'success'); syncQueue(true); });
-  window.addEventListener('offline', () => { updateNet(); toast('You are offline. Submissions will be queued.', 'warn'); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { stopCamera(); stopScan(); } });
-}
-
-/* ---------------- INIT ---------------- */
-function init() {
-  bind();
-  renderPhotos();
-  if (!CONFIG.AUTH_ENABLED) $('btnSendOtp').textContent = 'Continue';
-  const u = loadUser();
-  if (u) { S.user = u; enterApp(); }
-}
-init();
+    const cond = x.condition || 'Good';
+    const right
