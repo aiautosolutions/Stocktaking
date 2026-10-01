@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f6ff">
   <title>StockSense</title>
-  <style>body{opacity:0;background:#f5f6ff}</style>
+  <style>
+    html,body{margin:0;background:#f5f6ff}
+    html[data-theme="dark"],html[data-theme="dark"] body{background:#07071a}
+    #bootCover{position:fixed;inset:0;z-index:99999;background:inherit;transition:opacity .35s}
+  </style>
   <script>
     (function () {
       var t = null;
@@ -14,13 +18,18 @@
       document.documentElement.setAttribute('data-theme', t);
       var css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = 'styles.css?v=3';
+      css.href = 'styles.css?v=5';
+      css.onload = function () {
+        var c = document.getElementById('bootCover');
+        if (c) { c.style.opacity = '0'; setTimeout(function () { c.remove(); }, 400); }
+      };
       document.head.appendChild(css);
-      setTimeout(function () { document.body.style.opacity = '1'; }, 2500);
+      setTimeout(function () { var c = document.getElementById('bootCover'); if (c) { c.remove(); } }, 3000);
     })();
   </script>
 </head>
 <body>
+  <div id="bootCover"></div>
   <div class="aurora" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
   <div class="gridbg" aria-hidden="true"></div>
 
@@ -190,7 +199,7 @@
                 <button class="chip-b" data-delta="5" type="button">+5</button>
                 <button class="chip-b" data-delta="10" type="button">+10</button>
                 <button class="chip-b" data-delta="50" type="button">+50</button>
-                <button class="chip-b" data-reset="1" type="button">Reset</button>
+                <button class="chip-b" id="btnQtyReset" type="button">Reset</button>
               </div>
             </div>
 
@@ -340,9 +349,39 @@
   <canvas id="workCanvas" hidden></canvas>
 
   <script>
+    /* Theme toggle + error reporter (works even if app.js fails) */
     (function () {
+      function banner(msg) {
+        var b = document.getElementById('jsErr');
+        if (!b) {
+          b = document.createElement('div');
+          b.id = 'jsErr';
+          b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;padding:14px 16px;border-radius:14px;background:#f43f5e;color:#fff;font:600 13px/1.5 system-ui,sans-serif;box-shadow:0 12px 30px rgba(0,0,0,.3);white-space:pre-wrap';
+          document.body.appendChild(b);
+        }
+        b.textContent += (b.textContent ? '\n' : '') + msg;
+      }
+      window.ssBanner = banner;
+      window.addEventListener('error', function (e) {
+        if (e && e.message) { banner('Error: ' + e.message + (e.lineno ? ' (line ' + e.lineno + ')' : '')); }
+      });
+      function toggleTheme() {
+        var d = document.documentElement;
+        var t = d.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        d.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) { m.setAttribute('content', t === 'dark' ? '#07071a' : '#f5f6ff'); }
+        try { localStorage.setItem('ops_st_theme', t); } catch (x) {}
+      }
+      document.getElementById('btnThemeLogin').addEventListener('click', toggleTheme);
+      document.getElementById('btnTheme').addEventListener('click', toggleTheme);
+
       var js = document.createElement('script');
-      js.src = 'app.js?v=3';
+      js.src = 'app.js?v=5';
+      js.onerror = function () { banner('app.js could not be found. It must be named app.js (lowercase) in the same folder as index.html.'); };
+      js.onload = function () {
+        if (!window.STOCKSENSE_READY) { banner('app.js loaded but did not start. Re-copy the whole app.js file.'); }
+      };
       document.body.appendChild(js);
     })();
   </script>
