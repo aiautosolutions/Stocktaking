@@ -3,448 +3,414 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f5f6ff">
-  <title>StockSense F&amp;B</title>
-  <style>
-    html,body{margin:0;background:#f5f6ff}
-    html[data-theme="dark"],html[data-theme="dark"] body{background:#07071a}
-    #bootCover{position:fixed;inset:0;z-index:99999;background:inherit;transition:opacity .35s}
-  </style>
+  <meta name="theme-color" content="#f3f4f6">
+  <title>StockSense · F&amp;B Stock Take</title>
   <script>
     (function () {
       var t = null;
-      try { t = localStorage.getItem('ops_st_theme'); } catch (e) {}
-      if (!t) { t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+      try { t = localStorage.getItem('ss_theme'); } catch (e) {}
+      if (!t) { t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
       document.documentElement.setAttribute('data-theme', t);
-      var css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = 'styles.css?v=' + Date.now();
-      css.onload = function () {
-        var c = document.getElementById('bootCover');
-        if (c) { c.style.opacity = '0'; setTimeout(function () { c.remove(); }, 400); }
-      };
-      document.head.appendChild(css);
-      setTimeout(function () { var c = document.getElementById('bootCover'); if (c) { c.remove(); } }, 3000);
     })();
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
-  <div id="bootCover"></div>
-  <div class="aurora" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
-  <div class="gridbg" aria-hidden="true"></div>
 
-  <!-- ===================== LOGIN ===================== -->
-  <section id="viewLogin" class="view active">
-    <button class="ib theme-btn login-theme" id="btnThemeLogin" type="button" aria-label="Switch light or dark mode">
-      <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-      <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-    </button>
+<!-- SVG icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/></symbol>
+    <symbol id="i-freeze" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 9h14M8 5v1M8 12v3"/></symbol>
+    <symbol id="i-grain" viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M10 20v-6h4v6"/></symbol>
+    <symbol id="i-glass" viewBox="0 0 24 24"><path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3zM12 13v8M8 21h8"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-3 7-7 0-5-5-7-5-12-3 2-4 5-4 7-1-1-2-2-2-4-2 2-3 5-3 9 0 4 3 7 7 7z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 9"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-flip" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 16.9"/><path d="M12 12v9M9 18l3 3 3-3"/></symbol>
+    <symbol id="i-count" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  </defs>
+</svg>
 
-    <div class="login-wrap">
-      <div class="lock center">
-        <div class="logo js-logo">YC</div>
-        <div>
-          <h1 class="bname js-company">Your Company</h1>
-          <p class="bcap">StockSense · F&amp;B Operations</p>
-        </div>
+<!-- ===================== LOGIN ===================== -->
+<section id="viewLogin" class="view active">
+  <div class="login">
+    <header class="login-top">
+      <div class="brand">
+        <span class="mark js-logo">YC</span>
+        <span class="brand-text"><b class="js-company">Your Company</b><small>StockSense · F&amp;B</small></span>
       </div>
+      <button id="btnThemeLogin" class="icon-btn js-theme" type="button" aria-label="Toggle dark mode">
+        <svg class="ic ic-moon"><use href="#i-moon"/></svg><svg class="ic ic-sun"><use href="#i-sun"/></svg>
+      </button>
+    </header>
 
-      <div class="glass login-card">
-        <div class="hero-visual" aria-hidden="true">
-          <span class="hv hv1">🥩</span><span class="hv hv2">🧀</span><span class="hv hv3">🥬</span><span class="hv hv4">🍷</span><span class="hv hv5">🧊</span>
-          <div class="hv-core"><span>⌁</span></div>
+    <div class="login-grid">
+      <!-- Product preview panel -->
+      <aside class="preview" aria-hidden="true">
+        <div class="pv-head">
+          <span class="pv-live"><i></i>Live count</span>
+          <span class="pv-time mono" id="pvClock">--:--</span>
         </div>
+        <p class="pv-label">Chiller · Session FB-OCT</p>
+        <p class="pv-big mono">142<span>/ 168</span></p>
+        <div class="pv-track"><i style="width:84%"></i></div>
+        <div class="pv-rows">
+          <div class="pv-row"><span class="dot ok"></span><span>Chicken Breast</span><b class="mono">24.5 kg</b></div>
+          <div class="pv-row"><span class="dot warn"></span><span>Fresh Milk 1L</span><b class="mono warn-t">−3 btl</b></div>
+          <div class="pv-row"><span class="dot ok"></span><span>Mozzarella 2kg</span><b class="mono">12 pack</b></div>
+          <div class="pv-row"><span class="dot bad"></span><span>Romaine Lettuce</span><b class="mono bad-t">Expired</b></div>
+        </div>
+        <div class="pv-bars">
+          <i style="height:40%"></i><i style="height:62%"></i><i style="height:48%"></i><i style="height:80%"></i><i style="height:58%"></i><i style="height:92%"></i><i style="height:70%"></i>
+        </div>
+      </aside>
 
+      <!-- Sign-in card -->
+      <main class="card signin">
         <div id="stepEmail">
-          <p class="eyebrow">Secure sign in</p>
-          <h2 class="title">Count smarter. <span class="gtext">Waste less.</span></h2>
-          <p class="sub">Enter your email address and we will send you a one-time verification code.</p>
-          <div class="field">
-            <label class="flabel" for="inpEmail">Email address</label>
-            <input id="inpEmail" type="email" class="inp" placeholder="name@company.com" autocomplete="email" inputmode="email">
-          </div>
-          <button id="btnSendOtp" class="btn btn-p w100 mt" type="button">Send verification code</button>
+          <p class="kicker">Stock take for food &amp; beverage</p>
+          <h1>Count every item.<br><span>Lose nothing.</span></h1>
+          <p class="lede">Sign in with your work email. We'll send you a one-time code.</p>
+          <label class="lbl" for="inpEmail">Email address</label>
+          <input id="inpEmail" class="inp" type="email" inputmode="email" autocomplete="email" placeholder="name@company.com">
+          <button id="btnSendOtp" class="btn btn-primary btn-block" type="button">Continue<svg class="ic"><use href="#i-arrow"/></svg></button>
         </div>
 
         <div id="stepOtp" class="hidden">
-          <p class="eyebrow">Verification</p>
-          <h2 class="title">Check your <span class="gtext">inbox</span></h2>
-          <p class="sub">A 6-digit code was sent to <b id="lblOtpEmail"></b></p>
-          <div class="field">
-            <label class="flabel" for="inpOtp">Verification code</label>
-            <input id="inpOtp" type="text" inputmode="numeric" maxlength="6" class="inp inp-otp num" placeholder="000000" autocomplete="one-time-code">
-          </div>
-          <button id="btnVerifyOtp" class="btn btn-p w100 mt" type="button">Verify &amp; continue</button>
+          <p class="kicker">Verification</p>
+          <h1>Check your <span>inbox</span></h1>
+          <p class="lede">Enter the 6-digit code sent to <b id="lblOtpEmail"></b></p>
+          <label class="lbl" for="inpOtp">Verification code</label>
+          <input id="inpOtp" class="inp inp-otp mono" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••">
+          <button id="btnVerifyOtp" class="btn btn-primary btn-block" type="button">Verify &amp; sign in</button>
           <div class="otp-links">
-            <button id="btnBackEmail" class="link" type="button">← Change email</button>
+            <button id="btnBackEmail" class="link" type="button">Change email</button>
             <button id="btnResend" class="link" type="button">Resend code</button>
           </div>
         </div>
-      </div>
 
-      <div class="feat">
-        <span class="fchip">🧊 Works in chillers</span>
-        <span class="fchip">⌁ Barcode scan</span>
-        <span class="fchip">📅 Expiry tracking</span>
-        <span class="fchip">📷 Photo proof</span>
-      </div>
-      <p class="foot">Authorised personnel only · Every count is logged for audit</p>
-    </div>
-  </section>
-
-  <!-- ===================== APP ===================== -->
-  <section id="viewApp" class="view">
-    <div class="shell">
-      <header class="hdr">
-        <div class="lock">
-          <div class="logo js-logo">YC</div>
-          <div style="min-width:0">
-            <h1 class="bname js-company">Your Company</h1>
-            <p class="bcap">StockSense · F&amp;B</p>
-          </div>
-        </div>
-        <div class="hact">
-          <button class="ib theme-btn" id="btnTheme" type="button" aria-label="Switch light or dark mode">
-            <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-            <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-          </button>
-          <button class="ib" id="btnLogout" type="button" aria-label="Sign out">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-          </button>
-        </div>
-      </header>
-
-      <main>
-        <!-- ========== COUNT ========== -->
-        <section id="tabCount" class="tab active">
-          <div class="wrow">
-            <div style="min-width:0">
-              <p class="eyebrow" id="lblGreeting">Welcome back</p>
-              <h2 class="title">Stock <span class="gtext">count</span></h2>
-              <p class="sub ellip" id="lblUser">—</p>
-            </div>
-            <div class="ava" id="avatar">—</div>
-          </div>
-
-          <article class="holo">
-            <div class="htop">
-              <span class="tier-pill"><i></i>Live session</span>
-              <span id="netBadge" class="net online"><i></i><b>Online</b></span>
-            </div>
-            <div class="blabel">Session</div>
-            <div class="bval"><strong class="num" id="lblSession">—</strong></div>
-            <div class="hstats">
-              <div><small>Counted today</small><b class="num" id="hsCount">0</b></div>
-              <div><small>Variance value</small><b class="num" id="hsVar">RM 0.00</b></div>
-              <div><small>Exceptions</small><b class="num" id="hsExc">0</b></div>
-            </div>
-          </article>
-
-          <div class="sech mt2">
-            <h3 class="sect">Storage zone</h3>
-            <span class="muted" id="lblZoneProg">—</span>
-          </div>
-          <div id="zoneChips" class="zones"></div>
-
-          <article class="glass prog">
-            <div class="prog-top">
-              <span class="prog-title">Ready to submit</span>
-              <span class="prog-count num" id="progText">0 / 3</span>
-            </div>
-            <div class="prog-bar"><i id="progBar"></i></div>
-            <div class="prog-steps">
-              <span class="pstep" id="ps1"><b>1</b>Item</span>
-              <span class="pstep" id="ps2"><b>2</b>Count</span>
-              <span class="pstep" id="ps3"><b>3</b>Evidence</span>
-            </div>
-          </article>
-
-          <!-- 01 ITEM -->
-          <article class="glass card">
-            <div class="ch-row">
-              <div class="ch-left"><span class="stepn">01</span><h3 class="sect">Find item</h3></div>
-              <button id="btnScan" class="pill-btn" type="button">⌁ Scan</button>
-            </div>
-
-            <div id="scanWrap" class="scan-wrap hidden">
-              <div id="reader"></div>
-              <button id="btnStopScan" class="btn btn-g w100 mt" type="button">Close scanner</button>
-            </div>
-
-            <div id="searchWrap" class="search-wrap">
-              <span class="search-ico">⌕</span>
-              <input id="inpSearch" class="inp search" placeholder="Search name, code or barcode" autocomplete="off">
-            </div>
-            <div id="searchResults" class="results"></div>
-
-            <div id="itemCard" class="item-card hidden">
-              <div class="ic-art" id="icArt">🍽️</div>
-              <div class="ic-body">
-                <p class="ic-cat" id="icCat">—</p>
-                <h4 class="ic-name" id="icName">—</h4>
-                <p class="ic-meta num" id="icMeta">—</p>
-              </div>
-              <button id="btnClearItem" class="ic-x" type="button" aria-label="Change item">✕</button>
-              <div class="ic-stats">
-                <div><small>Expected</small><b class="num" id="icExp">—</b></div>
-                <div><small>Unit cost</small><b class="num" id="icCost">—</b></div>
-                <div><small>Zone</small><b id="icZone">—</b></div>
-              </div>
-              <p id="icRecount" class="ic-recount hidden"></p>
-            </div>
-
-            <button id="btnManual" class="link mt" type="button">+ Item not listed? Add manually</button>
-            <div id="manualWrap" class="hidden">
-              <div class="grid-2">
-                <div class="field">
-                  <label class="flabel" for="inpManCode">Item code / barcode</label>
-                  <input id="inpManCode" class="inp num" placeholder="Optional" autocomplete="off" maxlength="100">
-                </div>
-                <div class="field">
-                  <label class="flabel" for="selManUom">Unit <i>*</i></label>
-                  <select id="selManUom" class="inp"></select>
-                </div>
-              </div>
-              <div class="field">
-                <label class="flabel" for="inpManName">Item name <i>*</i></label>
-                <input id="inpManName" class="inp" placeholder="e.g. Mozzarella Block 2kg" autocomplete="off" maxlength="255">
-              </div>
-            </div>
-          </article>
-
-          <!-- 02 COUNT -->
-          <article class="glass card">
-            <div class="ch-row"><div class="ch-left"><span class="stepn">02</span><h3 class="sect">Physical count</h3></div></div>
-
-            <div class="field">
-              <label class="flabel">Quantity on hand <i>*</i></label>
-              <div class="stepper">
-                <button class="step-btn" id="btnMinus" type="button" aria-label="Decrease">−</button>
-                <div class="qty-box">
-                  <input id="inpQty" type="number" inputmode="decimal" min="0" step="any" class="inp qty num" value="">
-                  <span class="qty-uom" id="qtyUom">unit</span>
-                </div>
-                <button class="step-btn" id="btnPlus" type="button" aria-label="Increase">+</button>
-              </div>
-              <div class="chips" id="qtyChips"></div>
-            </div>
-
-            <div id="varPanel" class="var-panel hidden">
-              <div class="vp-cell"><small>Expected</small><b class="num" id="vpExp">—</b></div>
-              <div class="vp-cell"><small>Counted</small><b class="num" id="vpCnt">—</b></div>
-              <div class="vp-cell"><small>Variance</small><b class="num" id="vpVar">—</b></div>
-              <div class="vp-cell"><small>Value</small><b class="num" id="vpVal">—</b></div>
-              <div class="vp-meter"><i id="vpMeter"></i></div>
-            </div>
-
-            <div class="field">
-              <label class="flabel">Condition <i>*</i></label>
-              <div class="seg-grid">
-                <button class="seg active" data-cond="Good" type="button"><span>✓</span>Good</button>
-                <button class="seg" data-cond="Near Expiry" type="button"><span>⏳</span>Near expiry</button>
-                <button class="seg" data-cond="Expired" type="button"><span>⛔</span>Expired</button>
-                <button class="seg" data-cond="Spoiled" type="button"><span>🦠</span>Spoiled</button>
-                <button class="seg" data-cond="Damaged" type="button"><span>📦</span>Damaged</button>
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="field">
-                <label class="flabel" for="inpExpiry">Expiry date</label>
-                <input id="inpExpiry" type="date" class="inp">
-                <span id="expBadge" class="exp-badge hidden"></span>
-              </div>
-              <div class="field">
-                <label class="flabel" for="inpBatch">Batch / lot no.</label>
-                <input id="inpBatch" class="inp num" placeholder="Optional" autocomplete="off" maxlength="60">
-              </div>
-            </div>
-
-            <div class="field hidden" id="tempWrap">
-              <label class="flabel" for="inpTemp">Storage temperature (°C)</label>
-              <div class="temp-row">
-                <input id="inpTemp" type="number" inputmode="decimal" step="0.1" class="inp num" placeholder="e.g. 3.5">
-                <span id="tempBadge" class="temp-badge">—</span>
-              </div>
-            </div>
-
-            <div class="field">
-              <label class="flabel" for="inpRemarks">Remarks <span id="remarkReq" class="req hidden">· required</span></label>
-              <textarea id="inpRemarks" class="inp" rows="2" maxlength="1000" placeholder="Reason for variance, wastage, observations"></textarea>
-            </div>
-          </article>
-
-          <!-- 03 PHOTOS -->
-          <article class="glass card">
-            <div class="ch-row">
-              <div class="ch-left"><span class="stepn">03</span><h3 class="sect">Photo evidence</h3></div>
-              <span id="photoCounter" class="cnt num">0 / 5</span>
-            </div>
-            <p class="note left" id="photoReq">Optional for good stock. Required for variances and exceptions.</p>
-
-            <div id="camWrap" class="cam hidden">
-              <video id="camVideo" playsinline muted autoplay></video>
-              <div class="cam-guide"></div>
-              <div class="cam-line"></div>
-              <div id="camStamp" class="cam-stamp num"></div>
-              <div id="camFlash" class="cam-flash"></div>
-              <div class="cam-bar">
-                <button id="btnCamClose" class="cam-btn" type="button" aria-label="Close camera">✕</button>
-                <button id="btnCapture" class="shutter" type="button" aria-label="Capture photo"></button>
-                <button id="btnCamSwitch" class="cam-btn" type="button" aria-label="Switch camera">⟲</button>
-              </div>
-            </div>
-
-            <div class="grid-2 mt">
-              <button id="btnOpenCam" class="btn btn-p" type="button">📷 Camera</button>
-              <button id="btnPickPhoto" class="btn btn-g" type="button">🖼 Upload</button>
-            </div>
-            <input id="fileCamera" type="file" accept="image/*" capture="environment" hidden>
-            <input id="fileGallery" type="file" accept="image/*" multiple hidden>
-            <div id="photoGrid" class="photos"></div>
-          </article>
-
-          <!-- 04 SUBMIT -->
-          <article class="glass card">
-            <div class="ch-row"><div class="ch-left"><span class="stepn">04</span><h3 class="sect">Review &amp; submit</h3></div></div>
-            <div class="summary">
-              <div class="srow2"><span>Zone</span><b id="sumZone">—</b></div>
-              <div class="srow2"><span>Item</span><b id="sumItem">—</b></div>
-              <div class="srow2"><span>Count · Condition</span><b id="sumQty">—</b></div>
-              <div class="srow2"><span>Variance</span><b id="sumVar" class="num">—</b></div>
-              <div class="srow2"><span>Photos</span><b id="sumPhotos" class="num">0</b></div>
-            </div>
-            <div class="geo-row">
-              <span id="geoBadge" class="geo">📍 Locating…</span>
-              <button id="btnGeo" class="link" type="button">Refresh</button>
-            </div>
-            <button id="btnSubmit" class="btn btn-p w100 mt" type="button">Submit &amp; next item →</button>
-            <button id="btnClear" class="link w100 mt" type="button">Clear form</button>
-          </article>
-        </section>
-
-        <!-- ========== PROGRESS ========== -->
-        <section id="tabProgress" class="tab">
-          <p class="eyebrow">This session</p>
-          <h2 class="title">Count <span class="gtext">progress</span></h2>
-          <p class="sub">Live view of what has been counted, variances and stock at risk.</p>
-
-          <div class="stats">
-            <article class="glass ringcard">
-              <div class="ring">
-                <svg viewBox="0 0 74 74">
-                  <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="55%" stop-color="#4f8bff"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient></defs>
-                  <circle class="trk" cx="37" cy="37" r="31"/><circle class="val" id="ringVal" cx="37" cy="37" r="31" stroke-dasharray="194.8" stroke-dashoffset="194.8"/>
-                </svg>
-                <b class="num" id="ringPct">0%</b>
-              </div>
-              <div>
-                <p class="rt">Items counted</p>
-                <p class="rc" id="ringCap">No items yet</p>
-              </div>
-            </article>
-            <article class="glass mini">
-              <small>Accuracy</small>
-              <strong class="num" id="kpiAcc">—</strong>
-              <em>matched expected</em>
-            </article>
-          </div>
-          <div class="stats2">
-            <article class="glass mini"><small>Variance value</small><strong class="num" id="kpiVal">RM 0.00</strong></article>
-            <article class="glass mini"><small>At risk</small><strong class="num bad" id="kpiRisk">0</strong><em class="warnc">near expiry · expired · spoiled</em></article>
-          </div>
-
-          <div class="sec">
-            <div class="sech"><h3 class="sect">By zone</h3></div>
-            <div class="glass zbars" id="zoneBars"></div>
-          </div>
-
-          <div class="sec">
-            <div class="sech">
-              <h3 class="sect">Counted items</h3>
-              <button id="btnRefreshHistory" class="link" type="button">↻ Refresh</button>
-            </div>
-            <input id="inpFilter" class="inp" placeholder="Filter by item, code or zone">
-            <div class="glass mt"><div id="historyList" class="alist"></div></div>
-          </div>
-        </section>
-
-        <!-- ========== QUEUE ========== -->
-        <section id="tabQueue" class="tab">
-          <p class="eyebrow">Saved on this device</p>
-          <h2 class="title">Offline <span class="gtext">queue</span></h2>
-          <p class="sub">Counts made without signal, for example inside a walk-in freezer. They upload automatically when you are back online.</p>
-          <button id="btnSync" class="btn btn-p w100 mt2" type="button">⇪ Sync now</button>
-          <div class="glass mt"><div id="queueList" class="alist"></div></div>
-        </section>
+        <ul class="assure">
+          <li><svg class="ic"><use href="#i-shield"/></svg>Verified sign-in, every count is logged</li>
+          <li><svg class="ic"><use href="#i-cloud"/></svg>Works offline inside chillers and freezers</li>
+          <li><svg class="ic"><use href="#i-camera"/></svg>Photo evidence stamped with time and place</li>
+        </ul>
       </main>
     </div>
+  </div>
+</section>
 
-    <nav class="dock" aria-label="Primary">
-      <button class="nb tab-btn active" type="button" data-tab="tabCount">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M12 8v8M8 12h8"/></svg><span>Count</span>
-      </button>
-      <button class="nb tab-btn" type="button" data-tab="tabProgress">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Progress</span>
-      </button>
-      <button class="nb tab-btn" type="button" data-tab="tabQueue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 16.9"/><path d="M12 12v9M9 18l3 3 3-3"/></svg><span>Queue</span>
-        <em id="queueBadge" class="nbadge hidden">0</em>
-      </button>
-    </nav>
-  </section>
-
-  <!-- ===================== SUCCESS FLASH ===================== -->
-  <div id="flash" class="flash" aria-live="polite">
-    <div class="flash-card">
-      <div class="burst" id="flashIcon">✓</div>
-      <div>
-        <p class="flash-title" id="flashTitle">Counted</p>
-        <p class="flash-sub num" id="flashSub">—</p>
+<!-- ===================== APP ===================== -->
+<section id="viewApp" class="view">
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="brand">
+        <span class="mark js-logo">YC</span>
+        <span class="brand-text"><b class="js-company">Your Company</b><small id="lblUser">—</small></span>
       </div>
+      <div class="top-actions">
+        <span id="netBadge" class="net on"><i></i><b>Online</b></span>
+        <button id="btnTheme" class="icon-btn js-theme" type="button" aria-label="Toggle dark mode">
+          <svg class="ic ic-moon"><use href="#i-moon"/></svg><svg class="ic ic-sun"><use href="#i-sun"/></svg>
+        </button>
+        <button id="btnLogout" class="icon-btn" type="button" aria-label="Sign out"><svg class="ic"><use href="#i-logout"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+
+    <!-- ========== COUNT ========== -->
+    <section id="tabCount" class="tab active">
+
+      <article class="hero">
+        <div class="hero-top">
+          <div>
+            <p class="hero-label" id="lblGreeting">Good day</p>
+            <h2 class="hero-title mono" id="lblSession">—</h2>
+          </div>
+          <span class="chip-live"><i></i>Session open</span>
+        </div>
+        <div class="hero-stats">
+          <div><small>Counted</small><b class="mono" id="hsCount">0</b></div>
+          <div><small>Variance</small><b class="mono" id="hsVar">RM 0.00</b></div>
+          <div><small>At risk</small><b class="mono" id="hsRisk">0</b></div>
+        </div>
+      </article>
+
+      <div class="sec-head">
+        <h3>Storage zone</h3>
+        <span class="muted" id="lblZone">—</span>
+      </div>
+      <div id="zoneList" class="zones" role="tablist"></div>
+
+      <!-- Step 1 -->
+      <article class="card step">
+        <div class="step-head">
+          <span class="step-no">1</span>
+          <h3>Item</h3>
+          <button id="btnScan" class="btn btn-soft btn-sm" type="button"><svg class="ic"><use href="#i-scan"/></svg>Scan</button>
+        </div>
+
+        <div id="scanWrap" class="scanbox hidden">
+          <div id="reader"></div>
+          <button id="btnStopScan" class="btn btn-ghost btn-block" type="button">Close scanner</button>
+        </div>
+
+        <div class="search">
+          <svg class="ic"><use href="#i-search"/></svg>
+          <input id="inpSearch" class="inp" type="search" autocomplete="off" placeholder="Search name, code or barcode">
+        </div>
+        <div id="searchResults" class="results"></div>
+
+        <div id="itemCard" class="item hidden">
+          <div class="item-top">
+            <span class="item-ic"><svg class="ic"><use href="#i-box"/></svg></span>
+            <div class="item-txt">
+              <small id="icCat">—</small>
+              <b id="icName">—</b>
+              <span class="mono" id="icCode">—</span>
+            </div>
+            <button id="btnClearItem" class="icon-btn sm" type="button" aria-label="Change item"><svg class="ic"><use href="#i-x"/></svg></button>
+          </div>
+          <div class="item-facts">
+            <div><small>Expected</small><b class="mono" id="icExp">—</b></div>
+            <div><small>Unit cost</small><b class="mono" id="icCost">—</b></div>
+            <div><small>Zone</small><b id="icZone">—</b></div>
+          </div>
+          <p id="icRecount" class="notice hidden"></p>
+        </div>
+
+        <button id="btnManual" class="link mt" type="button">+ Item not in list? Add manually</button>
+        <div id="manualWrap" class="hidden">
+          <div class="grid2">
+            <div>
+              <label class="lbl" for="inpManName">Item name</label>
+              <input id="inpManName" class="inp" autocomplete="off" maxlength="200" placeholder="e.g. Fresh basil">
+            </div>
+            <div>
+              <label class="lbl" for="selManUom">Unit</label>
+              <select id="selManUom" class="inp"></select>
+            </div>
+          </div>
+          <label class="lbl" for="inpManCode">Code / barcode <em>optional</em></label>
+          <input id="inpManCode" class="inp mono" autocomplete="off" maxlength="80">
+        </div>
+      </article>
+
+      <!-- Step 2 -->
+      <article class="card step">
+        <div class="step-head"><span class="step-no">2</span><h3>Count</h3></div>
+
+        <label class="lbl">Quantity on hand</label>
+        <div class="qty">
+          <button id="btnMinus" class="qty-btn" type="button" aria-label="Decrease"><svg class="ic"><use href="#i-minus"/></svg></button>
+          <div class="qty-field">
+            <input id="inpQty" class="mono" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
+            <span id="qtyUom">unit</span>
+          </div>
+          <button id="btnPlus" class="qty-btn" type="button" aria-label="Increase"><svg class="ic"><use href="#i-plus"/></svg></button>
+        </div>
+        <div id="qtyChips" class="chips"></div>
+
+        <div id="varPanel" class="variance hidden">
+          <div><small>Expected</small><b class="mono" id="vpExp">—</b></div>
+          <div><small>Counted</small><b class="mono" id="vpCnt">—</b></div>
+          <div><small>Variance</small><b class="mono" id="vpVar">—</b></div>
+          <div><small>Value</small><b class="mono" id="vpVal">—</b></div>
+        </div>
+
+        <label class="lbl">Condition</label>
+        <div class="segs" id="condGroup">
+          <button class="seg active" data-cond="Good" type="button">Good</button>
+          <button class="seg" data-cond="Near Expiry" type="button">Near expiry</button>
+          <button class="seg" data-cond="Expired" type="button">Expired</button>
+          <button class="seg" data-cond="Spoiled" type="button">Spoiled</button>
+          <button class="seg" data-cond="Damaged" type="button">Damaged</button>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label class="lbl" for="inpExpiry"><svg class="ic xs"><use href="#i-cal"/></svg>Expiry date</label>
+            <input id="inpExpiry" class="inp" type="date">
+            <span id="expBadge" class="pill hidden"></span>
+          </div>
+          <div>
+            <label class="lbl" for="inpBatch">Batch / lot <em>optional</em></label>
+            <input id="inpBatch" class="inp mono" autocomplete="off" maxlength="60">
+          </div>
+        </div>
+
+        <div id="tempWrap" class="hidden">
+          <label class="lbl" for="inpTemp"><svg class="ic xs"><use href="#i-thermo"/></svg>Storage temperature (°C)</label>
+          <div class="temp">
+            <input id="inpTemp" class="inp mono" type="number" inputmode="decimal" step="0.1" placeholder="3.5">
+            <span id="tempBadge" class="pill">—</span>
+          </div>
+        </div>
+
+        <label class="lbl" for="inpRemarks">Remarks <em id="remarkReq" class="req hidden">required</em></label>
+        <textarea id="inpRemarks" class="inp" rows="2" maxlength="1000" placeholder="Reason for variance, wastage or notes"></textarea>
+      </article>
+
+      <!-- Step 3 -->
+      <article class="card step">
+        <div class="step-head"><span class="step-no">3</span><h3>Evidence</h3><span class="muted mono" id="photoCounter">0/5</span></div>
+        <p class="hint" id="photoReq">Optional for a matching count. Required for variances and problem stock.</p>
+
+        <div id="camWrap" class="cam hidden">
+          <video id="camVideo" playsinline muted autoplay></video>
+          <div class="cam-frame"></div>
+          <div id="camStamp" class="cam-stamp mono"></div>
+          <div id="camFlash" class="cam-flash"></div>
+          <div class="cam-bar">
+            <button id="btnCamClose" class="cam-btn" type="button" aria-label="Close camera"><svg class="ic"><use href="#i-x"/></svg></button>
+            <button id="btnCapture" class="shutter" type="button" aria-label="Take photo"></button>
+            <button id="btnCamSwitch" class="cam-btn" type="button" aria-label="Switch camera"><svg class="ic"><use href="#i-flip"/></svg></button>
+          </div>
+        </div>
+
+        <div class="grid2 tight">
+          <button id="btnOpenCam" class="btn btn-dark" type="button"><svg class="ic"><use href="#i-camera"/></svg>Camera</button>
+          <button id="btnPickPhoto" class="btn btn-ghost" type="button"><svg class="ic"><use href="#i-image"/></svg>Upload</button>
+        </div>
+        <input id="fileCamera" type="file" accept="image/*" capture="environment" hidden>
+        <input id="fileGallery" type="file" accept="image/*" multiple hidden>
+        <div id="photoGrid" class="photos"></div>
+      </article>
+
+      <!-- Review -->
+      <article class="card step">
+        <div class="step-head"><span class="step-no">4</span><h3>Review</h3></div>
+        <dl class="summary">
+          <div><dt>Zone</dt><dd id="sumZone">—</dd></div>
+          <div><dt>Item</dt><dd id="sumItem">—</dd></div>
+          <div><dt>Count</dt><dd id="sumQty">—</dd></div>
+          <div><dt>Variance</dt><dd id="sumVar" class="mono">—</dd></div>
+          <div><dt>Photos</dt><dd id="sumPhotos" class="mono">0</dd></div>
+        </dl>
+        <div class="geo">
+          <span id="geoBadge"><svg class="ic xs"><use href="#i-pin"/></svg>Locating…</span>
+          <button id="btnGeo" class="link" type="button">Refresh</button>
+        </div>
+        <button id="btnClear" class="link danger" type="button">Clear this count</button>
+      </article>
+
+      <div class="spacer"></div>
+    </section>
+
+    <!-- ========== PROGRESS ========== -->
+    <section id="tabProgress" class="tab">
+      <div class="page-head">
+        <p class="kicker">This session</p>
+        <h2>Progress</h2>
+      </div>
+
+      <div class="kpis">
+        <article class="card kpi big">
+          <div class="ring">
+            <svg viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="34"/><circle id="ringVal" class="ring-fg" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/></svg>
+            <b class="mono" id="ringPct">0%</b>
+          </div>
+          <div><small>Items counted</small><p id="ringCap">—</p></div>
+        </article>
+        <article class="card kpi"><small>Accuracy</small><b class="mono" id="kpiAcc">—</b><span>matched expected</span></article>
+        <article class="card kpi"><small>Variance value</small><b class="mono" id="kpiVal">RM 0.00</b><span>net of all lines</span></article>
+        <article class="card kpi"><small>At risk</small><b class="mono" id="kpiRisk">0</b><span>near expiry, expired, spoiled</span></article>
+        <article class="card kpi"><small>Pending sync</small><b class="mono" id="kpiQueue">0</b><span>saved on device</span></article>
+      </div>
+
+      <div class="sec-head"><h3>By zone</h3></div>
+      <article class="card zbars" id="zoneBars"></article>
+
+      <div class="sec-head">
+        <h3>Counted items</h3>
+        <button id="btnRefreshHistory" class="link" type="button">Refresh</button>
+      </div>
+      <div class="search">
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input id="inpFilter" class="inp" type="search" placeholder="Filter by item, code or zone">
+      </div>
+      <article class="card list" id="historyList"></article>
+      <div class="spacer"></div>
+    </section>
+
+    <!-- ========== QUEUE ========== -->
+    <section id="tabQueue" class="tab">
+      <div class="page-head">
+        <p class="kicker">Saved on this device</p>
+        <h2>Offline queue</h2>
+        <p class="lede">Counts made without signal are kept here and upload automatically when you're back online.</p>
+      </div>
+      <button id="btnSync" class="btn btn-primary btn-block" type="button"><svg class="ic"><use href="#i-cloud"/></svg>Sync now</button>
+      <article class="card list mt" id="queueList"></article>
+      <div class="spacer"></div>
+    </section>
+  </main>
+
+  <!-- Sticky submit bar (Count tab only) -->
+  <div id="submitBar" class="submitbar">
+    <div class="sb-in">
+      <div class="sb-prog">
+        <div class="sb-steps">
+          <span id="ps1">Item</span><span id="ps2">Count</span><span id="ps3">Evidence</span>
+        </div>
+        <div class="sb-track"><i id="progBar"></i></div>
+      </div>
+      <button id="btnSubmit" class="btn btn-primary" type="button">Submit<svg class="ic"><use href="#i-arrow"/></svg></button>
     </div>
   </div>
 
-  <div id="loader" class="loader hidden"><div class="spinner"></div><p id="loaderText">Loading…</p></div>
-  <div id="toastHost" class="toasts" aria-live="polite"></div>
-  <canvas id="workCanvas" hidden></canvas>
+  <nav class="dock" aria-label="Main">
+    <button class="dock-btn active" data-tab="tabCount" type="button"><svg class="ic"><use href="#i-count"/></svg><span>Count</span></button>
+    <button class="dock-btn" data-tab="tabProgress" type="button"><svg class="ic"><use href="#i-chart"/></svg><span>Progress</span></button>
+    <button class="dock-btn" data-tab="tabQueue" type="button"><svg class="ic"><use href="#i-cloud"/></svg><span>Queue</span><em id="queueBadge" class="badge hidden">0</em></button>
+  </nav>
+</section>
 
-  <script>
-    /* Theme toggle + error reporter (works even if app.js fails) */
-    (function () {
-      function banner(msg) {
-        var b = document.getElementById('jsErr');
-        if (!b) {
-          b = document.createElement('div');
-          b.id = 'jsErr';
-          b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;padding:14px 16px;border-radius:14px;background:#f43f5e;color:#fff;font:600 13px/1.5 system-ui,sans-serif;box-shadow:0 12px 30px rgba(0,0,0,.3);white-space:pre-wrap';
-          document.body.appendChild(b);
-        }
-        b.textContent += (b.textContent ? '\n' : '') + msg;
-      }
-      window.ssBanner = banner;
-      window.addEventListener('error', function (e) {
-        if (e && e.message) { banner('Error: ' + e.message + (e.lineno ? ' (line ' + e.lineno + ')' : '')); }
-      });
-      function toggleTheme() {
-        var d = document.documentElement;
-        var t = d.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        d.setAttribute('data-theme', t);
-        var m = document.querySelector('meta[name="theme-color"]');
-        if (m) { m.setAttribute('content', t === 'dark' ? '#07071a' : '#f5f6ff'); }
-        try { localStorage.setItem('ops_st_theme', t); } catch (x) {}
-      }
-      document.getElementById('btnThemeLogin').addEventListener('click', toggleTheme);
-      document.getElementById('btnTheme').addEventListener('click', toggleTheme);
+<!-- Success flash -->
+<div id="flash" class="flash" aria-live="polite">
+  <span class="flash-ic" id="flashIc"><svg class="ic"><use href="#i-check"/></svg></span>
+  <div><b id="flashTitle">Counted</b><small id="flashSub">—</small></div>
+</div>
 
-      var js = document.createElement('script');
-      js.src = 'app.js?v=' + Date.now();
-      js.onerror = function () { banner('app.js could not be found. It must be named app.js (lowercase) in the same folder as index.html.'); };
-      js.onload = function () {
-        if (!window.STOCKSENSE_READY) { banner('app.js loaded but did not start. Upload the complete app.js file again.'); }
-      };
-      document.body.appendChild(js);
-    })();
-  </script>
+<div id="loader" class="loader hidden"><span class="spin"></span><p id="loaderText">Loading…</p></div>
+<div id="toastHost" class="toasts" aria-live="polite"></div>
+<canvas id="workCanvas" hidden></canvas>
+
+<script>
+  /* Safety net: show any startup error on screen */
+  window.addEventListener('error', function (e) {
+    var b = document.getElementById('jsErr');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'jsErr';
+      b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;padding:12px 14px;border-radius:12px;background:#b42318;color:#fff;font:600 13px/1.5 system-ui,sans-serif;white-space:pre-wrap';
+      document.body.appendChild(b);
+    }
+    b.textContent = 'Error: ' + e.message + (e.lineno ? ' (line ' + e.lineno + ')' : '');
+  });
+</script>
+<script src="app.js?v=30"></script>
 </body>
 </html>
