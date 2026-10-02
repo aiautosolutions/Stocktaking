@@ -1,431 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f3f4f6">
-  <title>StockSense · F&amp;B Stock Take</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6f5">
+  <title>CGC StockSense</title>
   <script>
-    (function () {
-      var t = null;
-      try { t = localStorage.getItem('ss_theme'); } catch (e) {}
-      if (!t) { t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
-      document.documentElement.setAttribute('data-theme', t);
-    })();
+    try { document.documentElement.dataset.theme=localStorage.getItem('ss_theme')||'light'; } catch(e) {}
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
-  <link rel="stylesheet" href="styles.css?v=31">
+  <link rel="stylesheet" href="styles.css?v=50">
 </head>
 <body>
+<div id="toastHost" class="toasts" aria-live="polite"></div>
+<div id="loader" class="loader hidden"><div class="spinner"></div><b id="loaderText">Loading…</b></div>
 
-<!-- SVG icon sprite -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
-    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></symbol>
-    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
-    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
-    <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/></symbol>
-    <symbol id="i-freeze" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 9h14M8 5v1M8 12v3"/></symbol>
-    <symbol id="i-grain" viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M10 20v-6h4v6"/></symbol>
-    <symbol id="i-glass" viewBox="0 0 24 24"><path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3zM12 13v8M8 21h8"/></symbol>
-    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-3 7-7 0-5-5-7-5-12-3 2-4 5-4 7-1-1-2-2-2-4-2 2-3 5-3 9 0 4 3 7 7 7z"/></symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
-    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></symbol>
-    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 9"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
-    <symbol id="i-flip" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
-    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
-    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 16.9"/><path d="M12 12v9M9 18l3 3 3-3"/></symbol>
-    <symbol id="i-count" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
-    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></symbol>
-    <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/></symbol>
-    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
-  </defs>
-</svg>
-
-<!-- ===================== LOGIN ===================== -->
-<section id="viewLogin" class="view active">
-  <div class="login">
-    <header class="login-top">
-      <div class="brand">
-        <span class="mark js-logo">YC</span>
-        <span class="brand-text"><b class="js-company">Your Company</b><small>StockSense · F&amp;B</small></span>
-      </div>
-      <button id="btnThemeLogin" class="icon-btn js-theme" type="button" aria-label="Toggle dark mode">
-        <svg class="ic ic-moon"><use href="#i-moon"/></svg><svg class="ic ic-sun"><use href="#i-sun"/></svg>
-      </button>
-    </header>
-
+<section id="viewLogin" class="view active login-view">
+  <button id="btnThemeLogin" class="icon-btn theme-btn" type="button" aria-label="Switch theme">◐</button>
+  <main class="login-shell">
+    <div class="brand center"><span class="brand-mark js-logo">YC</span><div><b class="js-company">Your Company</b><small>STOCKSENSE · F&amp;B OPERATIONS</small></div></div>
     <div class="login-grid">
-      <!-- How it works panel (no business data shown) -->
-      <aside class="preview" aria-hidden="true">
-        <div class="pv-head">
-          <span class="pv-live"><i></i>How it works</span>
-        </div>
-        <p class="pv-label">Any item. Any storage area.</p>
-        <p class="pv-title">From shelf to report<br>in four steps.</p>
-        <ol class="pv-steps">
-          <li><span>1</span><div><b>Find or scan</b><small>Pick the item from your list, or scan its barcode</small></div></li>
-          <li><span>2</span><div><b>Count</b><small>Enter quantity in any unit: kg, litre, piece, carton</small></div></li>
-          <li><span>3</span><div><b>Prove it</b><small>Add a stamped photo for variances or problem stock</small></div></li>
-          <li><span>4</span><div><b>Submit</b><small>Saved to SharePoint, or queued when there is no signal</small></div></li>
+      <aside class="overview">
+        <span class="eyebrow"><i></i>How it works</span>
+        <p class="overline">Any item. Any storage area.</p>
+        <h1>From shelf to report<br>in four steps.</h1>
+        <ol>
+          <li><span>1</span><div><b>Find or scan</b><small>Choose the item or scan its barcode</small></div></li>
+          <li><span>2</span><div><b>Count</b><small>Use kg, litre, piece, carton, pack and more</small></div></li>
+          <li><span>3</span><div><b>Prove it</b><small>Add photo evidence for exceptions</small></div></li>
+          <li><span>4</span><div><b>Submit</b><small>Saved online or queued without signal</small></div></li>
         </ol>
-        <div class="pv-cats">
-          <span>Ingredients</span><span>Beverages</span><span>Packaging</span><span>Cleaning</span><span>Smallwares</span><span>Equipment</span>
-        </div>
+        <div class="category-cloud"><span>Ingredients</span><span>Beverages</span><span>Packaging</span><span>Cleaning</span><span>Smallwares</span><span>Equipment</span></div>
       </aside>
-
-      <!-- Sign-in card -->
-      <main class="card signin">
-        <div id="stepEmail">
-          <p class="kicker">Stock take for food &amp; beverage operations</p>
-          <h1>Count every item.<br><span>Lose nothing.</span></h1>
-          <p class="lede">Sign in with your work email. We'll send you a one-time code.</p>
-          <label class="lbl" for="inpEmail">Email address</label>
-          <input id="inpEmail" class="inp" type="email" inputmode="email" autocomplete="email" placeholder="name@company.com">
-          <button id="btnSendOtp" class="btn btn-primary btn-block" type="button">Continue<svg class="ic"><use href="#i-arrow"/></svg></button>
-        </div>
-
-        <div id="stepOtp" class="hidden">
-          <p class="kicker">Verification</p>
-          <h1>Check your <span>inbox</span></h1>
-          <p class="lede">Enter the 6-digit code sent to <b id="lblOtpEmail"></b></p>
-          <label class="lbl" for="inpOtp">Verification code</label>
-          <input id="inpOtp" class="inp inp-otp mono" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••">
-          <button id="btnVerifyOtp" class="btn btn-primary btn-block" type="button">Verify &amp; sign in</button>
-          <div class="otp-links">
-            <button id="btnBackEmail" class="link" type="button">Change email</button>
-            <button id="btnResend" class="link" type="button">Resend code</button>
-          </div>
-        </div>
-
-        <ul class="assure">
-          <li><svg class="ic"><use href="#i-shield"/></svg>Verified sign-in, every count is logged</li>
-          <li><svg class="ic"><use href="#i-cloud"/></svg>Works offline inside chillers and freezers</li>
-          <li><svg class="ic"><use href="#i-camera"/></svg>Photo evidence stamped with time and place</li>
-        </ul>
-      </main>
+      <article class="card login-card">
+        <p class="kicker">Staff access</p>
+        <h2>Start your <span>stock count.</span></h2>
+        <p class="lead">Enter the code assigned to you. Your name and outlet are retrieved securely after verification.</p>
+        <label for="inpStaffCode">Staff code</label>
+        <input id="inpStaffCode" class="input code-input" type="password" inputmode="text" autocomplete="off" placeholder="Enter staff code">
+        <button id="btnContinue" class="primary" type="button">Continue →</button>
+        <div class="assurance"><p>✓ Personal staff identification</p><p>✓ Works on shared outlet devices</p><p>✓ Offline counting after sign-in</p></div>
+      </article>
     </div>
-  </div>
+  </main>
 </section>
 
-<!-- ===================== APP ===================== -->
 <section id="viewApp" class="view">
-  <header class="topbar">
-    <div class="topbar-in">
-      <div class="brand">
-        <span class="mark js-logo">YC</span>
-        <span class="brand-text"><b class="js-company">Your Company</b><small id="lblUser">—</small></span>
-      </div>
-      <div class="top-actions">
-        <span id="netBadge" class="net on"><i></i><b>Online</b></span>
-        <button id="btnTheme" class="icon-btn js-theme" type="button" aria-label="Toggle dark mode">
-          <svg class="ic ic-moon"><use href="#i-moon"/></svg><svg class="ic ic-sun"><use href="#i-sun"/></svg>
-        </button>
-        <button id="btnLogout" class="icon-btn" type="button" aria-label="Sign out"><svg class="ic"><use href="#i-logout"/></svg></button>
-      </div>
-    </div>
-  </header>
+  <header class="topbar"><div class="topbar-in">
+    <div class="brand"><span class="brand-mark js-logo">YC</span><div><b class="js-company">Your Company</b><small id="lblUser">—</small></div></div>
+    <div class="top-actions"><span id="netBadge" class="net online"><i></i>Online</span><button id="btnTheme" class="icon-btn" type="button">◐</button><button id="btnLogout" class="icon-btn" type="button">↪</button></div>
+  </div></header>
 
   <main class="shell">
-
-    <!-- ========== COUNT ========== -->
     <section id="tabCount" class="tab active">
+      <article class="session-card"><div><small id="lblGreeting">Good day</small><h2 id="lblSession">—</h2></div><span class="live-pill"><i></i>Session open</span><div class="session-stats"><div><small>Counted</small><b id="statCount">0</b></div><div><small>Variance</small><b id="statVariance">RM 0.00</b></div><div><small>At risk</small><b id="statRisk">0</b></div></div></article>
 
-      <article class="hero">
-        <div class="hero-top">
-          <div>
-            <p class="hero-label" id="lblGreeting">Good day</p>
-            <h2 class="hero-title mono" id="lblSession">—</h2>
-          </div>
-          <span class="chip-live"><i></i>Session open</span>
-        </div>
-        <div class="hero-stats">
-          <div><small>Counted</small><b class="mono" id="hsCount">0</b></div>
-          <div><small>Variance</small><b class="mono" id="hsVar">RM 0.00</b></div>
-          <div><small>At risk</small><b class="mono" id="hsRisk">0</b></div>
-        </div>
-      </article>
+      <div class="section-head"><h3>Storage area</h3><small id="zoneStatus">—</small></div>
+      <div id="zoneList" class="zone-list"></div>
 
-      <div class="sec-head">
-        <h3>Storage zone</h3>
-        <span class="muted" id="lblZone">—</span>
-      </div>
-      <div id="zoneList" class="zones" role="tablist"></div>
-
-      <!-- Step 1 -->
-      <article class="card step">
-        <div class="step-head">
-          <span class="step-no">1</span>
-          <h3>Item</h3>
-          <button id="btnScan" class="btn btn-soft btn-sm" type="button"><svg class="ic"><use href="#i-scan"/></svg>Scan</button>
-        </div>
-
-        <div id="scanWrap" class="scanbox hidden">
-          <div id="reader"></div>
-          <button id="btnStopScan" class="btn btn-ghost btn-block" type="button">Close scanner</button>
-        </div>
-
-        <div class="search">
-          <svg class="ic"><use href="#i-search"/></svg>
-          <input id="inpSearch" class="inp" type="search" autocomplete="off" placeholder="Search name, code or barcode">
-        </div>
+      <article class="card form-card">
+        <div class="card-head"><span>1</span><h3>Item</h3><button id="btnScan" class="soft-btn" type="button">⌗ Scan</button></div>
+        <div id="scanWrap" class="hidden"><div id="reader"></div><button id="btnStopScan" class="secondary" type="button">Close scanner</button></div>
+        <div class="search"><span>⌕</span><input id="inpSearch" class="input" placeholder="Search name, code or barcode"></div>
         <div id="searchResults" class="results"></div>
-
-        <div id="itemCard" class="item hidden">
-          <div class="item-top">
-            <span class="item-ic"><svg class="ic"><use href="#i-box"/></svg></span>
-            <div class="item-txt">
-              <small id="icCat">—</small>
-              <b id="icName">—</b>
-              <span class="mono" id="icCode">—</span>
-            </div>
-            <button id="btnClearItem" class="icon-btn sm" type="button" aria-label="Change item"><svg class="ic"><use href="#i-x"/></svg></button>
-          </div>
-          <div class="item-facts">
-            <div><small>Expected</small><b class="mono" id="icExp">—</b></div>
-            <div><small>Unit cost</small><b class="mono" id="icCost">—</b></div>
-            <div><small>Zone</small><b id="icZone">—</b></div>
-          </div>
-          <p id="icRecount" class="notice hidden"></p>
-        </div>
-
-        <button id="btnManual" class="link mt" type="button">+ Item not in list? Add manually</button>
-        <div id="manualWrap" class="hidden">
-          <div class="grid2">
-            <div>
-              <label class="lbl" for="inpManName">Item name</label>
-              <input id="inpManName" class="inp" autocomplete="off" maxlength="200" placeholder="e.g. Fresh basil">
-            </div>
-            <div>
-              <label class="lbl" for="selManUom">Unit</label>
-              <select id="selManUom" class="inp"></select>
-            </div>
-          </div>
-          <div class="grid2">
-            <div>
-              <label class="lbl" for="selManCat">Category</label>
-              <select id="selManCat" class="inp"></select>
-            </div>
-            <div>
-              <label class="lbl" for="inpManCode">Code / barcode <em>optional</em></label>
-              <input id="inpManCode" class="inp mono" autocomplete="off" maxlength="80">
-            </div>
-          </div>
+        <div id="itemCard" class="selected hidden"><div><small id="itemCategory">—</small><h4 id="itemName">—</h4><p id="itemCode">—</p></div><button id="btnClearItem" type="button">×</button><div class="facts"><span><small>Expected</small><b id="itemExpected">—</b></span><span><small>Unit cost</small><b id="itemCost">—</b></span><span><small>Area</small><b id="itemZone">—</b></span></div></div>
+        <button id="btnManual" class="text-btn" type="button">+ Item not listed? Add manually</button>
+        <div id="manualWrap" class="manual hidden">
+          <div class="two"><div><label>Item name</label><input id="inpManualName" class="input" placeholder="e.g. Paper napkins"></div><div><label>Unit</label><select id="selManualUom" class="input"></select></div></div>
+          <div class="two"><div><label>Category</label><select id="selManualCategory" class="input"></select></div><div><label>Code / barcode <em>optional</em></label><input id="inpManualCode" class="input" autocomplete="off"></div></div>
         </div>
       </article>
 
-      <!-- Step 2 -->
-      <article class="card step">
-        <div class="step-head"><span class="step-no">2</span><h3>Count</h3></div>
-
-        <label class="lbl">Quantity on hand</label>
-        <div class="qty">
-          <button id="btnMinus" class="qty-btn" type="button" aria-label="Decrease"><svg class="ic"><use href="#i-minus"/></svg></button>
-          <div class="qty-field">
-            <input id="inpQty" class="mono" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
-            <span id="qtyUom">unit</span>
-          </div>
-          <button id="btnPlus" class="qty-btn" type="button" aria-label="Increase"><svg class="ic"><use href="#i-plus"/></svg></button>
-        </div>
-        <div id="qtyChips" class="chips"></div>
-
-        <div id="varPanel" class="variance hidden">
-          <div><small>Expected</small><b class="mono" id="vpExp">—</b></div>
-          <div><small>Counted</small><b class="mono" id="vpCnt">—</b></div>
-          <div><small>Variance</small><b class="mono" id="vpVar">—</b></div>
-          <div><small>Value</small><b class="mono" id="vpVal">—</b></div>
-        </div>
-
-        <label class="lbl">Condition</label>
-        <div class="segs" id="condGroup">
-          <button class="seg active" data-cond="Good" type="button">Good</button>
-          <button class="seg" data-cond="Near Expiry" type="button">Near expiry</button>
-          <button class="seg" data-cond="Expired" type="button">Expired</button>
-          <button class="seg" data-cond="Spoiled" type="button">Spoiled</button>
-          <button class="seg" data-cond="Damaged" type="button">Damaged</button>
-          <button class="seg" data-cond="Missing" type="button">Missing</button>
-        </div>
-
-        <div class="grid2">
-          <div>
-            <label class="lbl" for="inpExpiry"><svg class="ic xs"><use href="#i-cal"/></svg>Expiry date</label>
-            <input id="inpExpiry" class="inp" type="date">
-            <span id="expBadge" class="pill hidden"></span>
-          </div>
-          <div>
-            <label class="lbl" for="inpBatch">Batch / lot <em>optional</em></label>
-            <input id="inpBatch" class="inp mono" autocomplete="off" maxlength="60">
-          </div>
-        </div>
-
-        <div id="tempWrap" class="hidden">
-          <label class="lbl" for="inpTemp"><svg class="ic xs"><use href="#i-thermo"/></svg>Storage temperature (°C)</label>
-          <div class="temp">
-            <input id="inpTemp" class="inp mono" type="number" inputmode="decimal" step="0.1" placeholder="3.5">
-            <span id="tempBadge" class="pill">—</span>
-          </div>
-        </div>
-
-        <label class="lbl" for="inpRemarks">Remarks <em id="remarkReq" class="req hidden">required</em></label>
-        <textarea id="inpRemarks" class="inp" rows="2" maxlength="1000" placeholder="Reason for variance, wastage or notes"></textarea>
+      <article class="card form-card">
+        <div class="card-head"><span>2</span><h3>Physical count</h3></div>
+        <label>Quantity on hand</label><div class="counter"><button id="btnMinus" type="button">−</button><div><input id="inpQty" type="number" inputmode="decimal" step="any" min="0"><span id="qtyUom">unit</span></div><button id="btnPlus" type="button">+</button></div><div id="quickQty" class="quick"></div>
+        <div id="variancePanel" class="variance hidden"><span><small>Expected</small><b id="varExpected">—</b></span><span><small>Counted</small><b id="varCounted">—</b></span><span><small>Variance</small><b id="varQty">—</b></span><span><small>Value</small><b id="varValue">—</b></span></div>
+        <label>Condition</label><div id="conditionGroup" class="conditions"><button class="active" data-condition="Good" type="button">Good</button><button data-condition="Near Expiry" type="button">Near expiry</button><button data-condition="Expired" type="button">Expired</button><button data-condition="Spoiled" type="button">Spoiled</button><button data-condition="Damaged" type="button">Damaged</button><button data-condition="Missing" type="button">Missing</button></div>
+        <div class="two"><div><label>Expiry date <em>optional</em></label><input id="inpExpiry" class="input" type="date"><small id="expiryHint" class="hint"></small></div><div><label>Batch / lot <em>optional</em></label><input id="inpBatch" class="input"></div></div>
+        <div id="temperatureWrap" class="hidden"><label>Storage temperature (°C)</label><div class="temp"><input id="inpTemperature" class="input" type="number" step="0.1" placeholder="3.5"><span id="temperatureHint">Target</span></div></div>
+        <label>Remarks <em id="remarksRequired" class="hidden required">required</em></label><textarea id="inpRemarks" class="input" placeholder="Reason for variance, wastage or observations"></textarea>
       </article>
 
-      <!-- Step 3 -->
-      <article class="card step">
-        <div class="step-head"><span class="step-no">3</span><h3>Evidence</h3><span class="muted mono" id="photoCounter">0/5</span></div>
-        <p class="hint" id="photoReq">Optional for a matching count. Required for variances and problem stock.</p>
-
-        <div id="camWrap" class="cam hidden">
-          <video id="camVideo" playsinline muted autoplay></video>
-          <div class="cam-frame"></div>
-          <div id="camStamp" class="cam-stamp mono"></div>
-          <div id="camFlash" class="cam-flash"></div>
-          <div class="cam-bar">
-            <button id="btnCamClose" class="cam-btn" type="button" aria-label="Close camera"><svg class="ic"><use href="#i-x"/></svg></button>
-            <button id="btnCapture" class="shutter" type="button" aria-label="Take photo"></button>
-            <button id="btnCamSwitch" class="cam-btn" type="button" aria-label="Switch camera"><svg class="ic"><use href="#i-flip"/></svg></button>
-          </div>
-        </div>
-
-        <div class="grid2 tight">
-          <button id="btnOpenCam" class="btn btn-dark" type="button"><svg class="ic"><use href="#i-camera"/></svg>Camera</button>
-          <button id="btnPickPhoto" class="btn btn-ghost" type="button"><svg class="ic"><use href="#i-image"/></svg>Upload</button>
-        </div>
-        <input id="fileCamera" type="file" accept="image/*" capture="environment" hidden>
-        <input id="fileGallery" type="file" accept="image/*" multiple hidden>
-        <div id="photoGrid" class="photos"></div>
+      <article class="card form-card">
+        <div class="card-head"><span>3</span><h3>Evidence</h3><small id="photoCounter">0 / 5</small></div><p id="photoRule" class="help">Optional for a matching good count. Required for exceptions.</p>
+        <div id="cameraWrap" class="camera hidden"><video id="cameraVideo" autoplay muted playsinline></video><div id="cameraStamp"></div><div class="camera-actions"><button id="btnCloseCamera" type="button">×</button><button id="btnCapture" class="shutter" type="button"></button><button id="btnFlipCamera" type="button">↻</button></div></div>
+        <div class="photo-actions"><button id="btnOpenCamera" class="dark-btn" type="button">Camera</button><button id="btnUpload" class="secondary" type="button">Upload</button></div><input id="cameraFile" type="file" accept="image/*" capture="environment" hidden><input id="galleryFile" type="file" accept="image/*" multiple hidden><div id="photoGrid" class="photo-grid"></div>
       </article>
 
-      <!-- Review -->
-      <article class="card step">
-        <div class="step-head"><span class="step-no">4</span><h3>Review</h3></div>
-        <dl class="summary">
-          <div><dt>Zone</dt><dd id="sumZone">—</dd></div>
-          <div><dt>Item</dt><dd id="sumItem">—</dd></div>
-          <div><dt>Count</dt><dd id="sumQty">—</dd></div>
-          <div><dt>Variance</dt><dd id="sumVar" class="mono">—</dd></div>
-          <div><dt>Photos</dt><dd id="sumPhotos" class="mono">0</dd></div>
-        </dl>
-        <div class="geo">
-          <span id="geoBadge"><svg class="ic xs"><use href="#i-pin"/></svg>Locating…</span>
-          <button id="btnGeo" class="link" type="button">Refresh</button>
-        </div>
-        <button id="btnClear" class="link danger" type="button">Clear this count</button>
-      </article>
-
-      <div class="spacer"></div>
+      <article class="card form-card"><div class="card-head"><span>4</span><h3>Review</h3></div><div class="summary"><div><span>Outlet</span><b id="sumOutlet">—</b></div><div><span>Area</span><b id="sumZone">—</b></div><div><span>Item</span><b id="sumItem">—</b></div><div><span>Count</span><b id="sumCount">—</b></div><div><span>Variance</span><b id="sumVariance">—</b></div><div><span>Photos</span><b id="sumPhotos">0 / 5</b></div></div><div class="geo"><span id="geoStatus">Location not captured</span><button id="btnGeo" type="button">Refresh</button></div><button id="btnClear" class="danger-link" type="button">Clear this count</button></article>
+      <div class="page-spacer"></div>
     </section>
 
-    <!-- ========== PROGRESS ========== -->
-    <section id="tabProgress" class="tab">
-      <div class="page-head">
-        <p class="kicker">This session</p>
-        <h2>Progress</h2>
-      </div>
+    <section id="tabProgress" class="tab"><p class="kicker">This session</p><h1>Progress</h1><div class="metrics"><article class="card"><small>Items counted</small><b id="metricCount">0</b></article><article class="card"><small>Accuracy</small><b id="metricAccuracy">—</b></article><article class="card"><small>Variance value</small><b id="metricVariance">RM 0.00</b></article><article class="card"><small>At risk</small><b id="metricRisk">0</b></article></div><div class="section-head"><h3>By area</h3></div><article id="zoneProgress" class="card list"></article><div class="section-head"><h3>Counted items</h3><button id="btnRefresh" class="text-btn" type="button">Refresh</button></div><input id="inpFilter" class="input" placeholder="Filter by item, code or area"><article id="historyList" class="card list"></article><div class="page-spacer"></div></section>
 
-      <div class="kpis">
-        <article class="card kpi big">
-          <div class="ring">
-            <svg viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="34"/><circle id="ringVal" class="ring-fg" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/></svg>
-            <b class="mono" id="ringPct">0%</b>
-          </div>
-          <div><small>Items counted</small><p id="ringCap">—</p></div>
-        </article>
-        <article class="card kpi"><small>Accuracy</small><b class="mono" id="kpiAcc">—</b><span>matched expected</span></article>
-        <article class="card kpi"><small>Variance value</small><b class="mono" id="kpiVal">RM 0.00</b><span>net of all lines</span></article>
-        <article class="card kpi"><small>At risk</small><b class="mono" id="kpiRisk">0</b><span>near expiry, expired, spoiled</span></article>
-        <article class="card kpi"><small>Pending sync</small><b class="mono" id="kpiQueue">0</b><span>saved on device</span></article>
-      </div>
-
-      <div class="sec-head"><h3>By zone</h3></div>
-      <article class="card zbars" id="zoneBars"></article>
-
-      <div class="sec-head">
-        <h3>Counted items</h3>
-        <button id="btnRefreshHistory" class="link" type="button">Refresh</button>
-      </div>
-      <div class="search">
-        <svg class="ic"><use href="#i-search"/></svg>
-        <input id="inpFilter" class="inp" type="search" placeholder="Filter by item, code or zone">
-      </div>
-      <article class="card list" id="historyList"></article>
-      <div class="spacer"></div>
-    </section>
-
-    <!-- ========== QUEUE ========== -->
-    <section id="tabQueue" class="tab">
-      <div class="page-head">
-        <p class="kicker">Saved on this device</p>
-        <h2>Offline queue</h2>
-        <p class="lede">Counts made without signal are kept here and upload automatically when you're back online.</p>
-      </div>
-      <button id="btnSync" class="btn btn-primary btn-block" type="button"><svg class="ic"><use href="#i-cloud"/></svg>Sync now</button>
-      <article class="card list mt" id="queueList"></article>
-      <div class="spacer"></div>
-    </section>
+    <section id="tabQueue" class="tab"><p class="kicker">Saved on this device</p><h1>Offline queue</h1><p class="lead">Counts made without signal remain here until a connection is available.</p><button id="btnSync" class="primary" type="button">Sync now</button><article id="queueList" class="card list"></article><div class="page-spacer"></div></section>
   </main>
 
-  <!-- Sticky submit bar (Count tab only) -->
-  <div id="submitBar" class="submitbar">
-    <div class="sb-in">
-      <div class="sb-prog">
-        <div class="sb-steps">
-          <span id="ps1">Item</span><span id="ps2">Count</span><span id="ps3">Evidence</span>
-        </div>
-        <div class="sb-track"><i id="progBar"></i></div>
-      </div>
-      <button id="btnSubmit" class="btn btn-primary" type="button">Submit<svg class="ic"><use href="#i-arrow"/></svg></button>
-    </div>
-  </div>
-
-  <nav class="dock" aria-label="Main">
-    <button class="dock-btn active" data-tab="tabCount" type="button"><svg class="ic"><use href="#i-count"/></svg><span>Count</span></button>
-    <button class="dock-btn" data-tab="tabProgress" type="button"><svg class="ic"><use href="#i-chart"/></svg><span>Progress</span></button>
-    <button class="dock-btn" data-tab="tabQueue" type="button"><svg class="ic"><use href="#i-cloud"/></svg><span>Queue</span><em id="queueBadge" class="badge hidden">0</em></button>
-  </nav>
+  <div id="submitBar" class="submit-bar"><div><span id="readyItem">Item</span><span id="readyCount">Count</span><span id="readyEvidence">Evidence</span><i><em id="readinessBar"></em></i></div><button id="btnSubmit" class="primary" type="button">Submit →</button></div>
+  <nav class="dock"><button class="active" data-tab="tabCount" type="button"><span>▤</span>Count</button><button data-tab="tabProgress" type="button"><span>⌁</span>Progress</button><button data-tab="tabQueue" type="button"><span>⇩</span>Queue<em id="queueBadge" class="hidden">0</em></button></nav>
 </section>
 
-<!-- Success flash -->
-<div id="flash" class="flash" aria-live="polite">
-  <span class="flash-ic" id="flashIc"><svg class="ic"><use href="#i-check"/></svg></span>
-  <div><b id="flashTitle">Counted</b><small id="flashSub">—</small></div>
-</div>
-
-<div id="loader" class="loader hidden"><span class="spin"></span><p id="loaderText">Loading…</p></div>
-<div id="toastHost" class="toasts" aria-live="polite"></div>
+<div id="flash" class="flash"><span>✓</span><div><b id="flashTitle">Counted</b><small id="flashText">—</small></div></div>
 <canvas id="workCanvas" hidden></canvas>
-
-<script>
-  /* Safety net: show any startup error on screen */
-  window.addEventListener('error', function (e) {
-    var b = document.getElementById('jsErr');
-    if (!b) {
-      b = document.createElement('div');
-      b.id = 'jsErr';
-      b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;padding:12px 14px;border-radius:12px;background:#b42318;color:#fff;font:600 13px/1.5 system-ui,sans-serif;white-space:pre-wrap';
-      document.body.appendChild(b);
-    }
-    b.textContent = 'Error: ' + e.message + (e.lineno ? ' (line ' + e.lineno + ')' : '');
-  });
-</script>
-<script>
-  (function () {
-    var s = document.createElement('script');
-    s.src = 'app.js?v=' + Date.now();
-    s.onerror = function () { window.dispatchEvent(new ErrorEvent('error', { message: 'app.js not found. Upload app.js to the same folder as index.html.' })); };
-    s.onload = function () { if (!window.STOCKSENSE_READY) { window.dispatchEvent(new ErrorEvent('error', { message: 'app.js is incomplete. Upload the full file again (last line must be })();).' })); } };
-    document.body.appendChild(s);
-  })();
-</script>
-</body>
-</html>
+<script src="app.js?v=50"></script>
+</body></html>
