@@ -12,7 +12,7 @@ var CONFIG = {
   FLOW_VERIFY_STAFF_CODE: 'https://ca5fc5190790e573a9eafd8b611366.91.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/18931167830b40868c07c08724a31fa2/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=S16ve41XH4Ry1gF43VxNDY1ZP9TjQ639-dYbwT4BFBY',
 
   // Flow 2: ST - Register New Item (receives the item + photos, returns { success, reference })
-  FLOW_SUBMIT_ITEM: 'PASTE_ST_REGISTER_NEW_ITEM_HTTP_URL',
+  FLOW_SUBMIT_ITEM: 'https://ca5fc5190790e573a9eafd8b611366.91.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/04/workflows/0f84d66fa9324c3db8cdfa8ef757f371/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5xisWUPnsccmSsn1Z1NqjstMLG6wDKk4kuuT7P4fs8',
 
   CATEGORIES: ['Fresh food', 'Frozen food', 'Dry goods', 'Dairy', 'Beverage', 'Alcohol',
     'Sauces & condiments', 'Bakery', 'Packaging & disposables', 'Cleaning & chemicals',
