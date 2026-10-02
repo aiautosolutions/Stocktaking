@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
-  <link rel="stylesheet" href="styles.css?v=30">
+  <link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
 
@@ -66,30 +66,28 @@
     </header>
 
     <div class="login-grid">
-      <!-- Product preview panel -->
+      <!-- How it works panel (no business data shown) -->
       <aside class="preview" aria-hidden="true">
         <div class="pv-head">
-          <span class="pv-live"><i></i>Live count</span>
-          <span class="pv-time mono" id="pvClock">--:--</span>
+          <span class="pv-live"><i></i>How it works</span>
         </div>
-        <p class="pv-label">Chiller · Session FB-OCT</p>
-        <p class="pv-big mono">142<span>/ 168</span></p>
-        <div class="pv-track"><i style="width:84%"></i></div>
-        <div class="pv-rows">
-          <div class="pv-row"><span class="dot ok"></span><span>Chicken Breast</span><b class="mono">24.5 kg</b></div>
-          <div class="pv-row"><span class="dot warn"></span><span>Fresh Milk 1L</span><b class="mono warn-t">−3 btl</b></div>
-          <div class="pv-row"><span class="dot ok"></span><span>Mozzarella 2kg</span><b class="mono">12 pack</b></div>
-          <div class="pv-row"><span class="dot bad"></span><span>Romaine Lettuce</span><b class="mono bad-t">Expired</b></div>
-        </div>
-        <div class="pv-bars">
-          <i style="height:40%"></i><i style="height:62%"></i><i style="height:48%"></i><i style="height:80%"></i><i style="height:58%"></i><i style="height:92%"></i><i style="height:70%"></i>
+        <p class="pv-label">Any item. Any storage area.</p>
+        <p class="pv-title">From shelf to report<br>in four steps.</p>
+        <ol class="pv-steps">
+          <li><span>1</span><div><b>Find or scan</b><small>Pick the item from your list, or scan its barcode</small></div></li>
+          <li><span>2</span><div><b>Count</b><small>Enter quantity in any unit: kg, litre, piece, carton</small></div></li>
+          <li><span>3</span><div><b>Prove it</b><small>Add a stamped photo for variances or problem stock</small></div></li>
+          <li><span>4</span><div><b>Submit</b><small>Saved to SharePoint, or queued when there is no signal</small></div></li>
+        </ol>
+        <div class="pv-cats">
+          <span>Ingredients</span><span>Beverages</span><span>Packaging</span><span>Cleaning</span><span>Smallwares</span><span>Equipment</span>
         </div>
       </aside>
 
       <!-- Sign-in card -->
       <main class="card signin">
         <div id="stepEmail">
-          <p class="kicker">Stock take for food &amp; beverage</p>
+          <p class="kicker">Stock take for food &amp; beverage operations</p>
           <h1>Count every item.<br><span>Lose nothing.</span></h1>
           <p class="lede">Sign in with your work email. We'll send you a one-time code.</p>
           <label class="lbl" for="inpEmail">Email address</label>
@@ -213,8 +211,16 @@
               <select id="selManUom" class="inp"></select>
             </div>
           </div>
-          <label class="lbl" for="inpManCode">Code / barcode <em>optional</em></label>
-          <input id="inpManCode" class="inp mono" autocomplete="off" maxlength="80">
+          <div class="grid2">
+            <div>
+              <label class="lbl" for="selManCat">Category</label>
+              <select id="selManCat" class="inp"></select>
+            </div>
+            <div>
+              <label class="lbl" for="inpManCode">Code / barcode <em>optional</em></label>
+              <input id="inpManCode" class="inp mono" autocomplete="off" maxlength="80">
+            </div>
+          </div>
         </div>
       </article>
 
@@ -247,6 +253,7 @@
           <button class="seg" data-cond="Expired" type="button">Expired</button>
           <button class="seg" data-cond="Spoiled" type="button">Spoiled</button>
           <button class="seg" data-cond="Damaged" type="button">Damaged</button>
+          <button class="seg" data-cond="Missing" type="button">Missing</button>
         </div>
 
         <div class="grid2">
@@ -411,6 +418,14 @@
     b.textContent = 'Error: ' + e.message + (e.lineno ? ' (line ' + e.lineno + ')' : '');
   });
 </script>
-<script src="app.js?v=30"></script>
+<script>
+  (function () {
+    var s = document.createElement('script');
+    s.src = 'app.js?v=' + Date.now();
+    s.onerror = function () { window.dispatchEvent(new ErrorEvent('error', { message: 'app.js not found. Upload app.js to the same folder as index.html.' })); };
+    s.onload = function () { if (!window.STOCKSENSE_READY) { window.dispatchEvent(new ErrorEvent('error', { message: 'app.js is incomplete. Upload the full file again (last line must be })();).' })); } };
+    document.body.appendChild(s);
+  })();
+</script>
 </body>
 </html>
