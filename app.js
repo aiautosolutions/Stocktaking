@@ -9,7 +9,7 @@ var CONFIG = {
   APP_NAME: 'StockSense',
 
   // Flow 1: ST - Verify Staff Code (receives { code }, returns { status, staffName, outlet })
-  FLOW_VERIFY_STAFF_CODE: 'PASTE_ST_VERIFY_STAFF_CODE_HTTP_URL',
+  FLOW_VERIFY_STAFF_CODE: 'https://ca5fc5190790e573a9eafd8b611366.91.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/18931167830b40868c07c08724a31fa2/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=S16ve41XH4Ry1gF43VxNDY1ZP9TjQ639-dYbwT4BFBY',
 
   // Flow 2: ST - Register New Item (receives the item + photos, returns { success, reference })
   FLOW_SUBMIT_ITEM: 'PASTE_ST_REGISTER_NEW_ITEM_HTTP_URL',
