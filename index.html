@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f6ff">
-  <title>StockSense</title>
+  <title>StockSense F&amp;B</title>
   <style>
     html,body{margin:0;background:#f5f6ff}
     html[data-theme="dark"],html[data-theme="dark"] body{background:#07071a}
@@ -18,7 +18,7 @@
       document.documentElement.setAttribute('data-theme', t);
       var css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = 'styles.css?v=5';
+      css.href = 'styles.css?v=' + Date.now();
       css.onload = function () {
         var c = document.getElementById('bootCover');
         if (c) { c.style.opacity = '0'; setTimeout(function () { c.remove(); }, 400); }
@@ -33,14 +33,6 @@
   <div class="aurora" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
   <div class="gridbg" aria-hidden="true"></div>
 
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#7c5cff"/><stop offset="55%" stop-color="#4f8bff"/><stop offset="100%" stop-color="#22d3ee"/>
-      </linearGradient>
-    </defs>
-  </svg>
-
   <!-- ===================== LOGIN ===================== -->
   <section id="viewLogin" class="view active">
     <button class="ib theme-btn login-theme" id="btnThemeLogin" type="button" aria-label="Switch light or dark mode">
@@ -53,14 +45,19 @@
         <div class="logo js-logo">YC</div>
         <div>
           <h1 class="bname js-company">Your Company</h1>
-          <p class="bcap">StockSense · Operations</p>
+          <p class="bcap">StockSense · F&amp;B Operations</p>
         </div>
       </div>
 
       <div class="glass login-card">
+        <div class="hero-visual" aria-hidden="true">
+          <span class="hv hv1">🥩</span><span class="hv hv2">🧀</span><span class="hv hv3">🥬</span><span class="hv hv4">🍷</span><span class="hv hv5">🧊</span>
+          <div class="hv-core"><span>⌁</span></div>
+        </div>
+
         <div id="stepEmail">
           <p class="eyebrow">Secure sign in</p>
-          <h2 class="title">Stock take, <span class="gtext">reimagined</span></h2>
+          <h2 class="title">Count smarter. <span class="gtext">Waste less.</span></h2>
           <p class="sub">Enter your email address and we will send you a one-time verification code.</p>
           <div class="field">
             <label class="flabel" for="inpEmail">Email address</label>
@@ -86,12 +83,12 @@
       </div>
 
       <div class="feat">
-        <span class="fchip">📷 Photo proof</span>
+        <span class="fchip">🧊 Works in chillers</span>
         <span class="fchip">⌁ Barcode scan</span>
-        <span class="fchip">☁ Offline sync</span>
-        <span class="fchip">📍 GPS stamp</span>
+        <span class="fchip">📅 Expiry tracking</span>
+        <span class="fchip">📷 Photo proof</span>
       </div>
-      <p class="foot">Authorised personnel only · Every submission is logged for audit</p>
+      <p class="foot">Authorised personnel only · Every count is logged for audit</p>
     </div>
   </section>
 
@@ -103,7 +100,7 @@
           <div class="logo js-logo">YC</div>
           <div style="min-width:0">
             <h1 class="bname js-company">Your Company</h1>
-            <p class="bcap">StockSense · Operations</p>
+            <p class="bcap">StockSense · F&amp;B</p>
           </div>
         </div>
         <div class="hact">
@@ -118,12 +115,12 @@
       </header>
 
       <main>
-        <!-- ========== NEW COUNT ========== -->
+        <!-- ========== COUNT ========== -->
         <section id="tabCount" class="tab active">
           <div class="wrow">
             <div style="min-width:0">
               <p class="eyebrow" id="lblGreeting">Welcome back</p>
-              <h2 class="title">New <span class="gtext">count</span></h2>
+              <h2 class="title">Stock <span class="gtext">count</span></h2>
               <p class="sub ellip" id="lblUser">—</p>
             </div>
             <div class="ava" id="avatar">—</div>
@@ -131,37 +128,42 @@
 
           <article class="holo">
             <div class="htop">
-              <span class="tier-pill"><i></i>Active session</span>
+              <span class="tier-pill"><i></i>Live session</span>
               <span id="netBadge" class="net online"><i></i><b>Online</b></span>
             </div>
             <div class="blabel">Session</div>
             <div class="bval"><strong class="num" id="lblSession">—</strong></div>
-            <div class="hbot">
-              <div>
-                <p class="hname">Today on this device</p>
-                <p class="hno num"><span id="lblToday">0</span> submitted</p>
-              </div>
-              <div class="hmark js-mark">YOUR COMPANY</div>
+            <div class="hstats">
+              <div><small>Counted today</small><b class="num" id="hsCount">0</b></div>
+              <div><small>Variance value</small><b class="num" id="hsVar">RM 0.00</b></div>
+              <div><small>Exceptions</small><b class="num" id="hsExc">0</b></div>
             </div>
           </article>
 
+          <div class="sech mt2">
+            <h3 class="sect">Storage zone</h3>
+            <span class="muted" id="lblZoneProg">—</span>
+          </div>
+          <div id="zoneChips" class="zones"></div>
+
           <article class="glass prog">
             <div class="prog-top">
-              <span class="prog-title">Submission readiness</span>
+              <span class="prog-title">Ready to submit</span>
               <span class="prog-count num" id="progText">0 / 3</span>
             </div>
             <div class="prog-bar"><i id="progBar"></i></div>
             <div class="prog-steps">
-              <span class="pstep" id="ps1"><b>1</b>Asset</span>
+              <span class="pstep" id="ps1"><b>1</b>Item</span>
               <span class="pstep" id="ps2"><b>2</b>Count</span>
-              <span class="pstep" id="ps3"><b>3</b>Photos</span>
+              <span class="pstep" id="ps3"><b>3</b>Evidence</span>
             </div>
           </article>
 
+          <!-- 01 ITEM -->
           <article class="glass card">
             <div class="ch-row">
-              <div class="ch-left"><span class="stepn">01</span><h3 class="sect">Location &amp; asset</h3></div>
-              <button id="btnScan" class="pill-btn" type="button">⌁ Scan code</button>
+              <div class="ch-left"><span class="stepn">01</span><h3 class="sect">Find item</h3></div>
+              <button id="btnScan" class="pill-btn" type="button">⌁ Scan</button>
             </div>
 
             <div id="scanWrap" class="scan-wrap hidden">
@@ -169,61 +171,116 @@
               <button id="btnStopScan" class="btn btn-g w100 mt" type="button">Close scanner</button>
             </div>
 
-            <div class="field">
-              <label class="flabel" for="selLocation">Location <i>*</i></label>
-              <select id="selLocation" class="inp"></select>
+            <div id="searchWrap" class="search-wrap">
+              <span class="search-ico">⌕</span>
+              <input id="inpSearch" class="inp search" placeholder="Search name, code or barcode" autocomplete="off">
             </div>
-            <div class="grid-2">
-              <div class="field">
-                <label class="flabel" for="inpAssetCode">Asset code <i>*</i></label>
-                <input id="inpAssetCode" class="inp num" placeholder="FA00123" autocomplete="off" maxlength="100">
+            <div id="searchResults" class="results"></div>
+
+            <div id="itemCard" class="item-card hidden">
+              <div class="ic-art" id="icArt">🍽️</div>
+              <div class="ic-body">
+                <p class="ic-cat" id="icCat">—</p>
+                <h4 class="ic-name" id="icName">—</h4>
+                <p class="ic-meta num" id="icMeta">—</p>
+              </div>
+              <button id="btnClearItem" class="ic-x" type="button" aria-label="Change item">✕</button>
+              <div class="ic-stats">
+                <div><small>Expected</small><b class="num" id="icExp">—</b></div>
+                <div><small>Unit cost</small><b class="num" id="icCost">—</b></div>
+                <div><small>Zone</small><b id="icZone">—</b></div>
+              </div>
+              <p id="icRecount" class="ic-recount hidden"></p>
+            </div>
+
+            <button id="btnManual" class="link mt" type="button">+ Item not listed? Add manually</button>
+            <div id="manualWrap" class="hidden">
+              <div class="grid-2">
+                <div class="field">
+                  <label class="flabel" for="inpManCode">Item code / barcode</label>
+                  <input id="inpManCode" class="inp num" placeholder="Optional" autocomplete="off" maxlength="100">
+                </div>
+                <div class="field">
+                  <label class="flabel" for="selManUom">Unit <i>*</i></label>
+                  <select id="selManUom" class="inp"></select>
+                </div>
               </div>
               <div class="field">
-                <label class="flabel" for="inpAssetName">Asset name <i>*</i></label>
-                <input id="inpAssetName" class="inp" placeholder="Dell Latitude 5440" autocomplete="off" maxlength="255">
+                <label class="flabel" for="inpManName">Item name <i>*</i></label>
+                <input id="inpManName" class="inp" placeholder="e.g. Mozzarella Block 2kg" autocomplete="off" maxlength="255">
               </div>
             </div>
           </article>
 
+          <!-- 02 COUNT -->
           <article class="glass card">
             <div class="ch-row"><div class="ch-left"><span class="stepn">02</span><h3 class="sect">Physical count</h3></div></div>
 
             <div class="field">
-              <label class="flabel">Physical quantity <i>*</i></label>
+              <label class="flabel">Quantity on hand <i>*</i></label>
               <div class="stepper">
-                <button class="step-btn" data-delta="-1" type="button" aria-label="Decrease">−</button>
-                <input id="inpQty" type="number" inputmode="numeric" min="0" step="1" class="inp qty num" value="1">
-                <button class="step-btn" data-delta="1" type="button" aria-label="Increase">+</button>
+                <button class="step-btn" id="btnMinus" type="button" aria-label="Decrease">−</button>
+                <div class="qty-box">
+                  <input id="inpQty" type="number" inputmode="decimal" min="0" step="any" class="inp qty num" value="">
+                  <span class="qty-uom" id="qtyUom">unit</span>
+                </div>
+                <button class="step-btn" id="btnPlus" type="button" aria-label="Increase">+</button>
               </div>
-              <div class="chips">
-                <button class="chip-b" data-delta="5" type="button">+5</button>
-                <button class="chip-b" data-delta="10" type="button">+10</button>
-                <button class="chip-b" data-delta="50" type="button">+50</button>
-                <button class="chip-b" id="btnQtyReset" type="button">Reset</button>
-              </div>
+              <div class="chips" id="qtyChips"></div>
+            </div>
+
+            <div id="varPanel" class="var-panel hidden">
+              <div class="vp-cell"><small>Expected</small><b class="num" id="vpExp">—</b></div>
+              <div class="vp-cell"><small>Counted</small><b class="num" id="vpCnt">—</b></div>
+              <div class="vp-cell"><small>Variance</small><b class="num" id="vpVar">—</b></div>
+              <div class="vp-cell"><small>Value</small><b class="num" id="vpVal">—</b></div>
+              <div class="vp-meter"><i id="vpMeter"></i></div>
             </div>
 
             <div class="field">
               <label class="flabel">Condition <i>*</i></label>
               <div class="seg-grid">
                 <button class="seg active" data-cond="Good" type="button"><span>✓</span>Good</button>
-                <button class="seg" data-cond="Damaged" type="button"><span>!</span>Damaged</button>
-                <button class="seg" data-cond="Missing" type="button"><span>?</span>Missing</button>
-                <button class="seg" data-cond="Obsolete" type="button"><span>⌛</span>Obsolete</button>
+                <button class="seg" data-cond="Near Expiry" type="button"><span>⏳</span>Near expiry</button>
+                <button class="seg" data-cond="Expired" type="button"><span>⛔</span>Expired</button>
+                <button class="seg" data-cond="Spoiled" type="button"><span>🦠</span>Spoiled</button>
+                <button class="seg" data-cond="Damaged" type="button"><span>📦</span>Damaged</button>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label class="flabel" for="inpExpiry">Expiry date</label>
+                <input id="inpExpiry" type="date" class="inp">
+                <span id="expBadge" class="exp-badge hidden"></span>
+              </div>
+              <div class="field">
+                <label class="flabel" for="inpBatch">Batch / lot no.</label>
+                <input id="inpBatch" class="inp num" placeholder="Optional" autocomplete="off" maxlength="60">
+              </div>
+            </div>
+
+            <div class="field hidden" id="tempWrap">
+              <label class="flabel" for="inpTemp">Storage temperature (°C)</label>
+              <div class="temp-row">
+                <input id="inpTemp" type="number" inputmode="decimal" step="0.1" class="inp num" placeholder="e.g. 3.5">
+                <span id="tempBadge" class="temp-badge">—</span>
               </div>
             </div>
 
             <div class="field">
-              <label class="flabel" for="inpRemarks">Remarks <span id="remarkReq" class="req hidden">· required for this condition</span></label>
-              <textarea id="inpRemarks" class="inp" rows="3" maxlength="1000" placeholder="Observations, discrepancies or notes"></textarea>
+              <label class="flabel" for="inpRemarks">Remarks <span id="remarkReq" class="req hidden">· required</span></label>
+              <textarea id="inpRemarks" class="inp" rows="2" maxlength="1000" placeholder="Reason for variance, wastage, observations"></textarea>
             </div>
           </article>
 
+          <!-- 03 PHOTOS -->
           <article class="glass card">
             <div class="ch-row">
               <div class="ch-left"><span class="stepn">03</span><h3 class="sect">Photo evidence</h3></div>
               <span id="photoCounter" class="cnt num">0 / 5</span>
             </div>
+            <p class="note left" id="photoReq">Optional for good stock. Required for variances and exceptions.</p>
 
             <div id="camWrap" class="cam hidden">
               <video id="camVideo" playsinline muted autoplay></video>
@@ -239,68 +296,75 @@
             </div>
 
             <div class="grid-2 mt">
-              <button id="btnOpenCam" class="btn btn-p" type="button">📷 Open camera</button>
+              <button id="btnOpenCam" class="btn btn-p" type="button">📷 Camera</button>
               <button id="btnPickPhoto" class="btn btn-g" type="button">🖼 Upload</button>
             </div>
             <input id="fileCamera" type="file" accept="image/*" capture="environment" hidden>
             <input id="fileGallery" type="file" accept="image/*" multiple hidden>
-
             <div id="photoGrid" class="photos"></div>
-            <p class="note left">Every photo is stamped with company, session, location, asset code, user, date/time and GPS.</p>
           </article>
 
+          <!-- 04 SUBMIT -->
           <article class="glass card">
             <div class="ch-row"><div class="ch-left"><span class="stepn">04</span><h3 class="sect">Review &amp; submit</h3></div></div>
             <div class="summary">
-              <div class="srow2"><span>Location</span><b id="sumLoc">—</b></div>
-              <div class="srow2"><span>Asset</span><b id="sumAsset" class="num">—</b></div>
-              <div class="srow2"><span>Quantity · Condition</span><b id="sumQty">—</b></div>
+              <div class="srow2"><span>Zone</span><b id="sumZone">—</b></div>
+              <div class="srow2"><span>Item</span><b id="sumItem">—</b></div>
+              <div class="srow2"><span>Count · Condition</span><b id="sumQty">—</b></div>
+              <div class="srow2"><span>Variance</span><b id="sumVar" class="num">—</b></div>
               <div class="srow2"><span>Photos</span><b id="sumPhotos" class="num">0</b></div>
             </div>
             <div class="geo-row">
               <span id="geoBadge" class="geo">📍 Locating…</span>
               <button id="btnGeo" class="link" type="button">Refresh</button>
             </div>
-            <button id="btnSubmit" class="btn btn-p w100 mt" type="button">Submit count →</button>
+            <button id="btnSubmit" class="btn btn-p w100 mt" type="button">Submit &amp; next item →</button>
             <button id="btnClear" class="link w100 mt" type="button">Clear form</button>
           </article>
         </section>
 
-        <!-- ========== HISTORY ========== -->
-        <section id="tabHistory" class="tab">
-          <p class="eyebrow">Current session</p>
-          <h2 class="title">My <span class="gtext">submissions</span></h2>
-          <p class="sub">Everything you have counted in this session.</p>
+        <!-- ========== PROGRESS ========== -->
+        <section id="tabProgress" class="tab">
+          <p class="eyebrow">This session</p>
+          <h2 class="title">Count <span class="gtext">progress</span></h2>
+          <p class="sub">Live view of what has been counted, variances and stock at risk.</p>
 
           <div class="stats">
             <article class="glass ringcard">
               <div class="ring">
-                <svg viewBox="0 0 74 74"><circle class="trk" cx="37" cy="37" r="31"/><circle class="val" id="ringVal" cx="37" cy="37" r="31" stroke-dasharray="194.8" stroke-dashoffset="194.8"/></svg>
+                <svg viewBox="0 0 74 74">
+                  <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="55%" stop-color="#4f8bff"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient></defs>
+                  <circle class="trk" cx="37" cy="37" r="31"/><circle class="val" id="ringVal" cx="37" cy="37" r="31" stroke-dasharray="194.8" stroke-dashoffset="194.8"/>
+                </svg>
                 <b class="num" id="ringPct">0%</b>
               </div>
               <div>
-                <p class="rt">Condition good</p>
-                <p class="rc" id="ringCap">No records yet</p>
+                <p class="rt">Items counted</p>
+                <p class="rc" id="ringCap">No items yet</p>
               </div>
             </article>
             <article class="glass mini">
-              <small>Submitted</small>
-              <strong class="num" id="kpiTotal">0</strong>
-              <em id="kpiVer">0 verified</em>
+              <small>Accuracy</small>
+              <strong class="num" id="kpiAcc">—</strong>
+              <em>matched expected</em>
             </article>
           </div>
-
           <div class="stats2">
-            <article class="glass mini"><small>Total qty</small><strong class="num" id="kpiQty">0</strong></article>
-            <article class="glass mini"><small>Exceptions</small><strong class="num bad" id="kpiExc">0</strong></article>
+            <article class="glass mini"><small>Variance value</small><strong class="num" id="kpiVal">RM 0.00</strong></article>
+            <article class="glass mini"><small>At risk</small><strong class="num bad" id="kpiRisk">0</strong><em class="warnc">near expiry · expired · spoiled</em></article>
+          </div>
+
+          <div class="sec">
+            <div class="sech"><h3 class="sect">By zone</h3></div>
+            <div class="glass zbars" id="zoneBars"></div>
           </div>
 
           <div class="sec">
             <div class="sech">
-              <h3 class="sect">Records</h3>
+              <h3 class="sect">Counted items</h3>
               <button id="btnRefreshHistory" class="link" type="button">↻ Refresh</button>
             </div>
-            <input id="inpFilter" class="inp" placeholder="Filter by asset code, name or location">
+            <input id="inpFilter" class="inp" placeholder="Filter by item, code or zone">
             <div class="glass mt"><div id="historyList" class="alist"></div></div>
           </div>
         </section>
@@ -309,7 +373,7 @@
         <section id="tabQueue" class="tab">
           <p class="eyebrow">Saved on this device</p>
           <h2 class="title">Offline <span class="gtext">queue</span></h2>
-          <p class="sub">Counts waiting to sync. They upload automatically when you are back online.</p>
+          <p class="sub">Counts made without signal, for example inside a walk-in freezer. They upload automatically when you are back online.</p>
           <button id="btnSync" class="btn btn-p w100 mt2" type="button">⇪ Sync now</button>
           <div class="glass mt"><div id="queueList" class="alist"></div></div>
         </section>
@@ -320,8 +384,8 @@
       <button class="nb tab-btn active" type="button" data-tab="tabCount">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M12 8v8M8 12h8"/></svg><span>Count</span>
       </button>
-      <button class="nb tab-btn" type="button" data-tab="tabHistory">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span>Submissions</span>
+      <button class="nb tab-btn" type="button" data-tab="tabProgress">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Progress</span>
       </button>
       <button class="nb tab-btn" type="button" data-tab="tabQueue">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 1 0 6 16.9"/><path d="M12 12v9M9 18l3 3 3-3"/></svg><span>Queue</span>
@@ -330,16 +394,13 @@
     </nav>
   </section>
 
-  <!-- ===================== SUCCESS SHEET ===================== -->
-  <div class="mb" id="successSheet" role="dialog" aria-modal="true" aria-labelledby="sucTitle">
-    <div class="mp">
-      <div class="grab"></div>
-      <div class="sv">
-        <div class="burst" id="sucIcon">✓</div>
-        <h3 class="stitle" id="sucTitle">Count <span class="gtext" id="sucWord">submitted</span></h3>
-        <p class="ssub" id="sucSub">Your count and photo evidence are saved in SharePoint.</p>
-        <div class="spts"><span>Stock Take ID</span><strong class="num gtext" id="sucId">—</strong></div>
-        <button id="btnNext" class="btn btn-p w100" type="button">Count next asset →</button>
+  <!-- ===================== SUCCESS FLASH ===================== -->
+  <div id="flash" class="flash" aria-live="polite">
+    <div class="flash-card">
+      <div class="burst" id="flashIcon">✓</div>
+      <div>
+        <p class="flash-title" id="flashTitle">Counted</p>
+        <p class="flash-sub num" id="flashSub">—</p>
       </div>
     </div>
   </div>
@@ -377,10 +438,10 @@
       document.getElementById('btnTheme').addEventListener('click', toggleTheme);
 
       var js = document.createElement('script');
-      js.src = 'app.js?v=7';
+      js.src = 'app.js?v=' + Date.now();
       js.onerror = function () { banner('app.js could not be found. It must be named app.js (lowercase) in the same folder as index.html.'); };
       js.onload = function () {
-        if (!window.STOCKSENSE_READY) { banner('app.js loaded but did not start. Re-copy the whole app.js file.'); }
+        if (!window.STOCKSENSE_READY) { banner('app.js loaded but did not start. Upload the complete app.js file again.'); }
       };
       document.body.appendChild(js);
     })();
